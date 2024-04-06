@@ -12,15 +12,20 @@ void read_system(linear_system* system, char* path){
         //On alloue le tableau qui stocke les équations
         system->equation = (int **)malloc(sizeof(int *)*system->len);
 
-        //Lecture et remplissage ligne à ligne 
+        //Lecture et remplissage ligne à ligne, /!\ double boucle potentiellement lente.
         for(int i = 0 ; i < system->len ; i++){
             system->equation[i] = (int *)malloc(sizeof(int )*(system->len+1));
-            fscanf(f,"%d %d %d %d\n",&system->equation[i][0],&system->equation[i][1],&system->equation[i][2],&system->equation[i][3]);
+            for(int j = 0 ; j < system->len+1 ; j++){
+                fscanf(f,"%d",&system->equation[i][j]);
+            }
+            
         }
     }
     fclose(f);
 }
-void save_system(linear_system* system, char* path);
+void save_system(linear_system* system, char* path){
+
+}
 void print_system(linear_system* system){
     for(int i = 0 ; i < system->len;i++){
         for(int j = 0 ; j < system->len+1;j++){
