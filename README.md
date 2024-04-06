@@ -5,6 +5,7 @@ pivot de gauss
 -> chaque itération : un pivot (1er élément de la diagonale) -> autant d'étapes que de ligne
 n^3
 ->projet : code c
+
 1) itératif (avec tooutes les bonnes propriétés)
 1.1) générer des systèmes
 1.2) diagonaliser la matrice
@@ -18,37 +19,40 @@ théoriquement, pas loin du #pragma omp parallel for ?
 3) gpu
 la suite au prochain épisode
 
-
-
-Format d'un fichier d'entrée : 
+Format d'un fichier d'entrée
 -----------
-n = nombre d'inconnues 
-1 ligne par équation 
+
+n = nombre d'inconnues
+1 ligne par équation
     -> n+1 éléments par ligne
     -> n+1 lignes
 
-Exemple : 
-``` 
+Exemple :
+
+```.txt file
 2
 2 1 5
 4 -6 -20
-``` 
+```
 
 -----------
-Format d'un fichier de sortie : 
+
+Format d'un fichier de sortie
 -----------
-n = nombre d'inconnues 
-1 ligne par équation 
+
+n = nombre d'inconnues
+1 ligne par équation
  matrice triangularisée en compressant ->on ne garde que la partie importante
 ->n + 2 lignes
 
-Exemple : 
-``` 
+Exemple :
+
+```.txt file
 2
 1 0.5 2.5
 -8 -30
 0.625 3.75
-``` 
+```
 
 -----------
 
