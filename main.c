@@ -1,30 +1,14 @@
 #include "linear_system.h"
-#include "iterative_solver.h"
 
-// un exemple de la démo qu'on pourrait avoir 
-int main(int argc, char const *argv[])
-{
-    int len = 3;
-    linear_system systems[10];
+int main(void){
+    linear_system * syst;
+    syst = (linear_system *)malloc(sizeof(linear_system));
 
-    char path[] = "./system";
+    //Récupération du système dans sys1.txt
+    read_system(syst,"./systems/sys1.txt");
 
-    for (int i = 0; i < 10; i++)
-    {
-        generate_system(len);
-        solve_system(&systems[i]);
+    print_system(syst);
 
-        // Nom du système sauvegardé selon l'horodatage et la taille du système
-        save_system(&system[i],path);
-        len *= 2;
-    }
-
-    for (int i = 0; i < 10; i++)
-    {
-        
-
-    }
-    
-    
-    return 0;
+    save_system(syst,"./systems/sys2.txt");
+    free_system(syst);
 }
