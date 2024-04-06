@@ -23,6 +23,9 @@ void read_system(linear_system* system, char* path){
     }
     fclose(f);
 }
+
+// utilisé uniquement par le générateur normalement 
+// c'est bien une fonction différente de celle utilisée par le solveur 
 void save_system(linear_system* system, char* path){
     FILE * f;
 
@@ -57,4 +60,6 @@ void free_system(linear_system * system){
         free(system);
     }
 }
+
+// penser à utiliser des s_rand pour 
 linear_system* generate_system(int len);
