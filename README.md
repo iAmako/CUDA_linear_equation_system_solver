@@ -9,8 +9,8 @@ n^3
 1) itératif (avec tooutes les bonnes propriétés)
 1.1) générer des systèmes
 1.2) diagonaliser la matrice
-1.3) trouver pivot (plus gros coeff) et inversion si besoin est
-1.4) propager pivot
+    1.2.1) trouver pivot (plus gros coeff) et inversion si besoin est
+    1.2.2) propager pivot
 1.5) enregistrer données
 documentation / commentaires propres :)
 2) parallèle

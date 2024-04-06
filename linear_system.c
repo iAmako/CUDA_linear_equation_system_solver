@@ -10,11 +10,11 @@ void read_system(linear_system* system, char* path){
         fscanf(f,"%d \n",&system->len);
 
         //On alloue le tableau qui stocke les équations
-        system->equation = (int **)malloc(sizeof(int *)*system->len);
+        system->equation = (float **)malloc(sizeof(float *)*system->len);
 
         //Lecture et remplissage ligne à ligne, /!\ double boucle potentiellement lente.
         for(int i = 0 ; i < system->len ; i++){
-            system->equation[i] = (int *)malloc(sizeof(int )*(system->len+1));
+            system->equation[i] = (float *)malloc(sizeof(float )*(system->len+1));
             for(int j = 0 ; j < system->len+1 ; j++){
                 fscanf(f,"%d",&system->equation[i][j]);
             }
@@ -58,5 +58,3 @@ void free_system(linear_system * system){
     }
 }
 linear_system* generate_system(int len);
-void find_pivot(/*truc*/);
-void swap_rows(int* row1, int* row2);
