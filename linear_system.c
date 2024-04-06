@@ -14,8 +14,8 @@ void read_system(linear_system* system, char* path){
 
         //Lecture et remplissage ligne à ligne 
         for(int i = 0 ; i < system->len ; i++){
-            system->equation[i] = (int *)malloc(sizeof(int )*system->len+1);
-            fscanf(f,"%d %d %d %d",&system->equation[i][0],&system->equation[i][1],&system->equation[i][2],&system->equation[i][3]);
+            system->equation[i] = (int *)malloc(sizeof(int )*(system->len+1));
+            fscanf(f,"%d %d %d %d\n",&system->equation[i][0],&system->equation[i][1],&system->equation[i][2],&system->equation[i][3]);
         }
     }
     fclose(f);
@@ -27,6 +27,15 @@ void print_system(linear_system* system){
             printf("%d ",system->equation[i][j]);
         }
         printf("\n");
+    }
+}
+void free_system(linear_system * system){
+    if(system != NULL){
+        for(int i = 0 ; i < system->len;i++){
+            free(system->equation[i]);
+        }
+        free(system->equation);
+        free(system);
     }
 }
 linear_system* generate_system(int len);

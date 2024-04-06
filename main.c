@@ -1,6 +1,5 @@
 #include "linear_system.h"
-#include <stdio.h>
-#include <stdlib.h>
+
 int main(void){
     linear_system * syst;
     syst = (linear_system *)malloc(sizeof(linear_system));
@@ -10,5 +9,5 @@ int main(void){
 
     print_system(syst);
 
-    free(syst);
+    free_system(syst);
 }
