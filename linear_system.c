@@ -24,6 +24,20 @@ void read_system(linear_system* system, char* path){
     fclose(f);
 }
 void save_system(linear_system* system, char* path){
+    FILE * f;
+
+    f = fopen(path,"w");
+
+    fprintf(f,"%d \n",system->len);
+
+    for(int i = 0 ; i < system->len ; i++){
+        for(int j = 0 ; j < system->len+1 ; j++){
+            fprintf(f,"%d ",system->equation[i][j]);
+        }
+        fprintf(f,"%s","\n"); 
+    }
+
+    fclose(f);
 
 }
 void print_system(linear_system* system){
