@@ -146,11 +146,14 @@ float* get_solution(linear_system* sys, int* lines_link){
     float tmp_membre_droit;
     for (int i = sys->len-1; i >= 0; i--)
     {
+        // On récupère le membre de droite dans l'équation dans tous les cas 
         tmp_membre_droit = sys->equation[lines_link[i]][sys->len];
         for (int j = sys->len-1; j > i; j--)
         {
+            // "On passe à droite" les éléments déjà connus et leur coeff
            tmp_membre_droit -= solution[j] * sys->equation[lines_link[i]][j];
         }
+        // Calcul de la valeur de la variable i grâce aux éléments précédemment calculés 
         solution[i] = tmp_membre_droit / sys->equation[lines_link[i]][i]; 
     }
 
