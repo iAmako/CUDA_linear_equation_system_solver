@@ -41,11 +41,11 @@ void solve_system(linear_system* system, char* path, int verbose){
 
     }
 
-    if(verbose > 0){
-        printf("Sauvegarde de la solution : %.64s\n");
-    }
-    save_solution(system, lines_link, path);
 
+    save_solution(system, lines_link, path);
+    if(verbose > 0){
+        printf("Solution sauvegardée : %.64s\n");
+    }
     free(lines_link);
 }
 
@@ -54,11 +54,11 @@ void solve_system(linear_system* system, char* path, int verbose){
 // La ligne pivot est celle détenant la plus grande valeur sur la colonne recherchée
 int find_pivot_for_row(linear_system* sys, int* lines_link, int row){
     int pivot_line = row;
-    int pivot_value = sys->equation[row][row];
+    int pivot_value = sys->equation[lines_link[row]][row];
     int cur_value = 0;
     for (int cur_line = row+1; cur_line < sys->len; cur_line++)
     {
-        cur_value = sys->equation[cur_line][row];
+        cur_value = sys->equation[lines_link[cur_line]][row];
         if(cur_value > pivot_value){
             pivot_line = cur_line;
             pivot_value = cur_value;
@@ -72,10 +72,6 @@ int find_pivot_for_row(linear_system* sys, int* lines_link, int row){
 // à vérifier : est-ce que ça marche encore si une ligne est swap deux fois d'affilée ? 
 // sûrement mieux de changer tout ce système de manière à ce qu'on ne swap pas les adresses mémoires 
 void swap_lines(linear_system* sys ,int* lines_link, int line1, int line2){
-    
-    int* tmp = sys->equation[line1];
-    sys->equation[line1] = sys->equation[line2];
-    sys->equation[line2] = tmp;
 
     int tmp = lines_link[line1];
     lines_link[line1] = lines_link[line2];
@@ -88,20 +84,20 @@ void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, i
     
     // Calcul du coefficient
     float multiplier = 1.0f; 
-    multiplier = sys->equation[target_line][pivot_row] / sys->equation[pivot_row][pivot_row];
+    multiplier = sys->equation[lines_link[target_line]][pivot_row] / sys->equation[lines_link[pivot_row]][pivot_row];
     
     // Application du pivot sur la ligne
     for (int i = 0; i < sys->len; i++)
     {
-        sys->equation[target_line][i] = sys->equation[target_line][i] - multiplier * sys->equation[pivot_row][i];
+        sys->equation[lines_link[target_line]][i] = sys->equation[lines_link[target_line]][i] - multiplier * sys->equation[lines_link[pivot_row]][i];
     }
     
 }
 // la fonction est bien différente de celle utilisée par le générateur de système 
 // puisqu'elle doit prendre en compte que des lignes ont été swaps 
 // ligne 1 : n = la taille 
-// lignes 2 -> n+1 les n prochaines ligne 
-// ligne n+2 -> la solution 
+// lignes 2 -> n+1 les n prochaines ligne (juste dans l'ordre, pas besoin de lines link vu qu'on a pas changé l'ordre dans la mémoire)
+// ligne n+2 -> la solution  (besoin de lines_link)
 // TODO
 void save_solution(linear_system* sys, int* lines_link, char* path){
 
