@@ -61,7 +61,6 @@ void free_system(linear_system * system){
     }
 }
 
-// penser à utiliser des s_rand pour 
 linear_system* generate_system(int len){
     linear_system * syst;
 
@@ -94,7 +93,8 @@ linear_system* generate_system(int len){
          }
     }
 
-    printf("x = %f , y = %f z = %f \n",tab_var[0],tab_var[1],tab_var[2]);
+    //Plus besoin c'est tchao (à la limite le garder si on veut comparer après une résolution)
     free(tab_var);
+
     return syst;
 }
