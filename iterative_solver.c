@@ -149,5 +149,5 @@ float* get_solution(linear_system* sys, int* lines_link){
 // TODO : à terminer
         solution[i] = sys->equation[lines_link[i]][sys->len] / sys->equation[lines_link[i]][i]; //ça semble être vrai pour la première ligne, pour les autres ça semble plus compliqué 
     }
-
+    
 }

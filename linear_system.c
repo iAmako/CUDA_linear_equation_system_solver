@@ -1,5 +1,5 @@
 #include "linear_system.h"
-
+#include <time.h>
 // Taille en entier, tout le reste en float
 void read_system(linear_system* system, char* path){
     FILE * f;
@@ -62,4 +62,39 @@ void free_system(linear_system * system){
 }
 
 // penser à utiliser des s_rand pour 
-linear_system* generate_system(int len);
+linear_system* generate_system(int len){
+    linear_system * syst;
+
+    syst = (linear_system *)malloc(sizeof(linear_system));
+    syst->len = len;
+    syst->equation = (float **)malloc(sizeof(float *)*syst->len);
+
+    for(int i = 0 ; i < len ; i++){
+        syst->equation[i] = (float *)malloc(sizeof(float )*(syst->len+1));
+
+    }
+    //Generation des valeurs des variables 
+    srand(time(NULL));
+    float * tab_var = (float *)malloc(sizeof(float)*len);
+
+    for(int i = 0 ; i < len ; i++){
+        //Déf arbitraire de l'intervalle [-25 ;25], potentiellement 0 (problème ? j'pense pas mais voilà)
+        tab_var[i] = rand()%51-25;
+    }
+
+    //Generation des coeffs pour chaque équation
+    for(int i = 0 ; i < len ; i++ ){
+        //Init à 0 du membre de droite de la ligne i
+         syst->equation[i][len] = 0;
+         for(int j = 0 ; j < len ; j++){
+            //Coeffs de la ligne i 
+            syst->equation[i][j] = rand()%51-25;
+            //Calcul cumulatif du membre de droite de la ligne i en ajoutant le coeff ij * var i  
+            syst->equation[i][len]+= syst->equation[i][j] * tab_var[j];
+         }
+    }
+
+    printf("x = %f , y = %f z = %f \n",tab_var[0],tab_var[1],tab_var[2]);
+    free(tab_var);
+    return syst;
+}
