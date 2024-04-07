@@ -20,6 +20,8 @@
 void solve_system(linear_system* system, char* path, int verbose){
     int pivot_line = 0;
     int* lines_link;
+
+
     lines_link = (int*)malloc(system->len * sizeof(int));
     
     for (int i = 0; i < system->len; i++)

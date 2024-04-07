@@ -6,14 +6,14 @@
 int main(int argc, char const *argv[])
 {
 
-    if(argc < 1 || argc > 2){
+    if(argc < 2 || argc > 3){
         printf("Utilisation : system_solver PATH VERBOSE\nAvec :\n\tPATH : Chemin vers le fichier\n\tVERBOSE : Le niveau d'affichage du programme (optionnel, défaut = 1)");
     }
 
     int verbose = 1;
 
     // Verbose arg ? 
-    if (argc > 1)
+    if (argc > 2)
     {
         verbose = atoi(argv[2]);
     }
@@ -21,12 +21,15 @@ int main(int argc, char const *argv[])
     char read_path[64];
     snprintf(read_path,sizeof(read_path),"%s",argv[1]);
     
+    
     //Lecture du fichier    
-    linear_system* sys = NULL;
+    linear_system* sys;
+    sys = (linear_system *)malloc(sizeof(linear_system));
+
     read_system(sys,read_path);
     
     char save_path[64];
-    snprintf(save_path,sizeof(save_path),"%s_solved",argv[1]); 
+    snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
 
     //Calculs & sauvegarde    
     solve_system(sys,save_path,verbose);

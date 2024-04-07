@@ -8,9 +8,12 @@ else
 	LDFLAGS=
 endif
 
-EXEC=solver
-SRC = $(wildcard *.c)
-OBJ = $(SRC:.c=.o)
+EXEC=solver generator
+SRC_SOLV = $(filter-out main_system_generator.c, $(wildcard *.c))
+OBJ_SOLV = $(SRC_SOLV:.c=.o)
+
+SRC_GEN = $(filter-out main_system_solver.c, $(wildcard *.c))
+OBJ_GEN = $(SRC_GEN:.c=.o)
 
 all: $(EXEC)
 
@@ -20,9 +23,12 @@ else
 	@echo "Generation en mode release"
 endif
 
-solver: $(OBJ)
+solver: $(OBJ_SOLV)
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
+generator: $(OBJ_GEN) 
+	@$(CC) -o $@ $^ $(LDFLAGS)
+	
 %.o: %.c
 	@$(CC) -o $@ -c $< $(CFLAGS)
 

@@ -4,10 +4,13 @@
 void read_system(linear_system* system, char* path){
     FILE * f;
     f = fopen(path,"r");
+    
+    
 
     if( ! (f == NULL)){
         //Recupération du nb de variables
         fscanf(f,"%d \n",&system->len);
+
 
         //On alloue le tableau qui stocke les équations
         system->equation = (float **)malloc(sizeof(float *)*system->len);
