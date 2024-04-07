@@ -1,6 +1,6 @@
 #include "linear_system.h"
 
-
+// Taille en entier, tout le reste en float
 void read_system(linear_system* system, char* path){
     FILE * f;
     f = fopen(path,"r");
@@ -16,7 +16,7 @@ void read_system(linear_system* system, char* path){
         for(int i = 0 ; i < system->len ; i++){
             system->equation[i] = (float *)malloc(sizeof(float )*(system->len+1));
             for(int j = 0 ; j < system->len+1 ; j++){
-                fscanf(f,"%d",&system->equation[i][j]);
+                fscanf(f,"%f",&system->equation[i][j]);
             }
             
         }
@@ -35,7 +35,7 @@ void save_system(linear_system* system, char* path){
 
     for(int i = 0 ; i < system->len ; i++){
         for(int j = 0 ; j < system->len+1 ; j++){
-            fprintf(f,"%d ",system->equation[i][j]);
+            fprintf(f,"%f ",system->equation[i][j]);
         }
         fprintf(f,"%s","\n"); 
     }
@@ -46,7 +46,7 @@ void save_system(linear_system* system, char* path){
 void print_system(linear_system* system){
     for(int i = 0 ; i < system->len;i++){
         for(int j = 0 ; j < system->len+1;j++){
-            printf("%d ",system->equation[i][j]);
+            printf("%f ",system->equation[i][j]);
         }
         printf("\n");
     }

@@ -35,7 +35,7 @@ void solve_system(linear_system* system, char* path, int verbose){
 
         //Echange des lignes si besoin
         if(pivot_line != pivot_row){
-            swap_lines(system, lines_link, pivot_line, pivot_row);
+            swap_lines(lines_link, pivot_line, pivot_row);
         }
         
         for(int line_to_change = pivot_row+1; line_to_change < system->len; line_to_change++){
