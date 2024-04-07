@@ -17,16 +17,19 @@ int main(int argc, char const *argv[])
     {
         verbose = atoi(argv[2]);
     }
+
+    char read_path[64];
+    snprintf(read_path,sizeof(read_path),"%s",argv[1]);
     
     //Lecture du fichier    
-    linear_system* sys;
-    read_system(sys,argv[1]);
+    linear_system* sys = NULL;
+    read_system(sys,read_path);
     
     char save_path[64];
-    fprintf(save_path,sizeof(save_path),"%s_solved",argv[1]); 
+    snprintf(save_path,sizeof(save_path),"%s_solved",argv[1]); 
 
     //Calculs & sauvegarde    
-    solve_system(sys,save_path,save_path,verbose);
+    solve_system(sys,save_path,verbose);
 
     //Libération de la mémoire
     free_system(sys);

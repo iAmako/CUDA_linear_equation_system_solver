@@ -34,7 +34,7 @@ int main(int argc, char const *argv[])
     {
         cur_time = time(NULL);
         time_str = gmtime(&cur_time);
-        sprintf(filename, sizeof(filename), "./systems/sys_%d_%Y-%m-%d_%H:%M:%S.txt", len, time_str);
+        snprintf(filename, sizeof(filename), "./systems/sys_%d_%Y-%m-%d_%H:%M:%S.txt", len, time_str);
         sys = generate_system(len);
         save_system(system,filename);
         free_system(sys);
