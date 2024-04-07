@@ -99,6 +99,9 @@ void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, i
 }
 // la fonction est bien différente de celle utilisée par le générateur de système 
 // puisqu'elle doit prendre en compte que des lignes ont été swaps 
+// ligne 1 : n = la taille 
+// lignes 2 -> n+1 les n prochaines ligne 
+// ligne n+2 -> la solution 
 // TODO
 void save_solution(linear_system* sys, int* lines_link, char* path){
 
