@@ -73,8 +73,8 @@ int find_pivot_for_row(linear_system* sys, int* lines_link, int row){
 // On va donc en permanence accéder aux données via ce tableau 
 // Ça va permettre de simplifier la sauvegarde des données de sortie 
 // à vérifier : est-ce que ça marche encore si une ligne est swap deux fois d'affilée ? 
-// sûrement mieux de changer tout ce système de manière à ce qu'on ne swap pas les adresses mémoires 
-void swap_lines(linear_system* sys ,int* lines_link, int line1, int line2){
+// sûrement mieux de changer tout ce système de manière à ce qu'on ne swap pas les adresses mémoires --> ça a été changé mais pas sûr que ça marche 
+void swap_lines(int* lines_link, int line1, int line2){
 
     int tmp = lines_link[line1];
     lines_link[line1] = lines_link[line2];
