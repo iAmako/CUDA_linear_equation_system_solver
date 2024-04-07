@@ -1,5 +1,7 @@
 #include "linear_system.h"
 #include "iterative_solver.h"
+#include <time.h>
+
 int main(void){
     linear_system * syst;
     syst = (linear_system *)malloc(sizeof(linear_system));
