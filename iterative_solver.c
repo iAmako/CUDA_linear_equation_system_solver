@@ -47,7 +47,7 @@ void solve_system(linear_system* system, char* path, int verbose){
 
     save_solution(system, lines_link, path);
     if(verbose > 0){
-        printf("Solution sauvegardée : %.64s\n");
+        printf("Solution sauvegardée : %.64s\n",path);
     }
     free(lines_link);
 }
@@ -117,16 +117,15 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
     {
         for (int j = 0; j < sys->len; j++)
         {
-            fprintf(f,"%f",sys->equation[i][j]);
+            fprintf(f,"%f ",sys->equation[lines_link[i]][j]);
         }
         fprintf(f,"\n");
     }
     
     // Sauvegarde de la solution
     float* solution;
-    solution = (float*) malloc(sys->len * sizeof(float));
     solution = get_solution(sys, lines_link);
-    for (int i = sys->len-1; i >= 0; i++)
+    for (int i = 0; i < sys->len; i++)
     {
         fprintf(f,"%f ",solution[i]);
     }
@@ -143,11 +142,17 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
 // besoin d'utiliser les lines link ici
 float* get_solution(linear_system* sys, int* lines_link){
 
-    float* solution;
-    for (int i = sys->len-1; i >= 0; i++)
+    float* solution = (float *)malloc(sizeof(float)*sys->len);
+    float tmp_membre_droit;
+    for (int i = sys->len-1; i >= 0; i--)
     {
-// TODO : à terminer
-        solution[i] = sys->equation[lines_link[i]][sys->len] / sys->equation[lines_link[i]][i]; //ça semble être vrai pour la première ligne, pour les autres ça semble plus compliqué 
+        tmp_membre_droit = sys->equation[lines_link[i]][sys->len];
+        for (int j = sys->len-1; j > i; j--)
+        {
+           tmp_membre_droit -= solution[j] * sys->equation[lines_link[i]][j];
+        }
+        solution[i] = tmp_membre_droit / sys->equation[lines_link[i]][i]; 
     }
-    
+
+    return solution;
 }
