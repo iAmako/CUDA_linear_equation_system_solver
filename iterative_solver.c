@@ -3,6 +3,9 @@
 #include "iterative_solver.h"
 
 
+// ! Attention, il existe des cas particulier qui risques de créer des divisions par 0, ce sera à gérer
+// exemple : ligne qui est le multiple d'une autre 
+
 
 // boucle des colonnes 
 //      on  trouve le plus grand nombre de la i-ème colonne 
@@ -87,7 +90,8 @@ void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, i
     multiplier = sys->equation[lines_link[target_line]][pivot_row] / sys->equation[lines_link[pivot_row]][pivot_row];
     
     // Application du pivot sur la ligne
-    for (int i = 0; i < sys->len; i++)
+    // C'est bien sys->len+1 pour modifier l'entièreté de l'équation en prenant en compte le résultat 
+    for (int i = 0; i < sys->len+1; i++)
     {
         sys->equation[lines_link[target_line]][i] = sys->equation[lines_link[target_line]][i] - multiplier * sys->equation[lines_link[pivot_row]][i];
     }
@@ -98,7 +102,52 @@ void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, i
 // ligne 1 : n = la taille 
 // lignes 2 -> n+1 les n prochaines ligne (juste dans l'ordre, pas besoin de lines link vu qu'on a pas changé l'ordre dans la mémoire)
 // ligne n+2 -> la solution  (besoin de lines_link)
-// TODO
+// à vérifier
 void save_solution(linear_system* sys, int* lines_link, char* path){
+
+    FILE * f;
+    // Ouverture du fichier
+    f = fopen(path,"w");
+
+    // Sauvegarde de la taille
+    fprintf(f,"%d\n",sys->len);
+
+    // Sauvegarde des nouvelles équations
+    for (int i = 0; i < sys->len; i++)
+    {
+        for (int j = 0; j < sys->len; j++)
+        {
+            fprintf(f,"%f",sys->equation[i][j]);
+        }
+        fprintf(f,"\n");
+    }
+    
+    // Sauvegarde de la solution
+    float* solution;
+    solution = (float*) malloc(sys->len * sizeof(float));
+    solution = get_solution(sys, lines_link);
+    for (int i = sys->len-1; i >= 0; i++)
+    {
+        fprintf(f,"%f ",solution[i]);
+    }
+
+    // Libération de la mémoire 
+    free(solution);
+
+    // Fermeture du fichier
+    fclose(f);
+
+}
+
+// Retourne la solution d'un système déjà triangularisé (c'est à dire qui est passé par la fonction solve_system)
+// besoin d'utiliser les lines link ici
+float* get_solution(linear_system* sys, int* lines_link){
+
+    float* solution;
+    for (int i = sys->len-1; i >= 0; i++)
+    {
+// TODO : à terminer
+        solution[i] = sys->equation[lines_link[i]][sys->len] / sys->equation[lines_link[i]][i]; //ça semble être vrai pour la première ligne, pour les autres ça semble plus compliqué 
+    }
 
 }
