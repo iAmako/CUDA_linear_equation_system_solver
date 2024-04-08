@@ -10,6 +10,7 @@ int main(int argc, char const *argv[])
     if (argc > 2)
     {
         printf("Utilisation : system_generator LEN NB\nAvec :\n\tLEN : La taille des systèmes (Défaut : 30) \n\tNB : Le nombre de systèmes à générer (Défaut : 1)\n");
+        return EXIT_SUCCESS;
     }
     char filename[64];
     time_t cur_time;
