@@ -4,6 +4,8 @@
 
 // main generateur de systemes
 // enregsitré sous ./systems/sys_horodatage.txt
+// TODO permettre de créer n fichiers avec des tailles allant de x à y (y-x / n = l'augmentation de taille entre chaque itération)
+
 int main(int argc, char const *argv[])
 {
 
