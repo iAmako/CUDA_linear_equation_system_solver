@@ -41,6 +41,8 @@
 *.i*86
 *.x86_64
 *.hex
+/generator
+/solver
 
 # Debug files
 *.dSYM/
