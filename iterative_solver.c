@@ -17,6 +17,12 @@
 // system : le système à solve
 // path : le path vers le fichier de sortie, qui contiendra la solution
 // verbose : sortie uniquement dans le fichier de sortie si verbose = 0, infos basiques dans la sortie standard si verbose = 1, infos avancée si verbose = 2 (à implémenter)
+/**
+ * Résout un système d'équations linéaires 
+ * PATH : le chemin vers le fichie de sauvegarde
+ * verbose : optionnel | défaut = 1 | définie la précision de la sortie textuel de la fonction
+ *           0 = aucune sortie
+*/
 void solve_system(linear_system* system, char* path, int verbose){
     int pivot_line = 0;
     int* lines_link;
@@ -57,6 +63,12 @@ void solve_system(linear_system* system, char* path, int verbose){
 // Renvoies la ligne du pivot
 // row -> la colonne du pivot
 // La ligne pivot est celle détenant la plus grande valeur sur la colonne recherchée
+/**
+ * Renvoies le numéro de ligne du pivot recherché pour la colonne ROW passée en paramètre
+ * sys : le système d'équations linéaires étudié
+ * lines_link : La matrice des adresses du système d'équations linéaires
+ * row : la colonne pour laquelle on recherche le pivot 
+*/
 int find_pivot_for_row(linear_system* sys, int* lines_link, int row){
     int pivot_line = row;
     int pivot_value = sys->equation[lines_link[row]][row];
@@ -71,11 +83,16 @@ int find_pivot_for_row(linear_system* sys, int* lines_link, int row){
     }
     return pivot_line;
 }
-// On effectue ce changement uniquement dans le tableau d'entier pour garder sa forme originale dans le système linéaire 
+// On effectue ce changement uniquement dans le tableau d'entier pour garder sa forme originale dans le système d'équations linéaires 
 // On va donc en permanence accéder aux données via ce tableau 
 // Ça va permettre de simplifier la sauvegarde des données de sortie 
 // à vérifier : est-ce que ça marche encore si une ligne est swap deux fois d'affilée ? 
 // sûrement mieux de changer tout ce système de manière à ce qu'on ne swap pas les adresses mémoires --> ça a été changé mais pas sûr que ça marche 
+/**
+ * Echange les adresses de deux lignes de la matrice 
+ * lines_link : la matrice des adresses du système d'équations linéaires 
+ * line1, line2 : les lignes à échanger
+*/
 void swap_lines(int* lines_link, int line1, int line2){
 
     int tmp = lines_link[line1];
@@ -85,6 +102,13 @@ void swap_lines(int* lines_link, int line1, int line2){
 // applique le pivot sur la ligne passé en paramètre en effectuant la multiplication nécessaire
 // comme on a swap les lignes pivot row est normalement = pivot line 
 // peut-être besoin de passer par lines link dépendant comment on gère ? 
+/**
+ * Effectue les opérations d'addition & multiplication pour appliquer le pivot à la ligne passé en paramètre 
+ * sys : le système d'équations linéaires étudié
+ * lines_link : La matrice des adresses du système d'équations linéaires
+ * target_line : la ligne sur laquelle appliquer le pivot 
+ * pivot_row : la colonne du pivot 
+*/
 void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, int pivot_row){
     
     // Calcul du coefficient
@@ -105,6 +129,12 @@ void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, i
 // lignes 2 -> n+1 les n prochaines ligne (juste dans l'ordre, pas besoin de lines link vu qu'on a pas changé l'ordre dans la mémoire)
 // ligne n+2 -> la solution  (besoin de lines_link)
 // à vérifier
+/**
+ * Sauvegarde la solution du système d'équations linéaires 
+ * sys : le système d'équations linéaires étudié
+ * lines_link : La matrice des adresses du système d'équations linéaires
+ * PATH : le chemin vers le fichier de sauvegarde
+*/
 void save_solution(linear_system* sys, int* lines_link, char* path){
 
     FILE * f;
@@ -142,6 +172,11 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
 
 // Retourne la solution d'un système déjà triangularisé (c'est à dire qui est passé par la fonction solve_system)
 // besoin d'utiliser les lines link ici
+/**
+ * Retourne la solution au système d'équations linéaires triangularisé 
+ * sys : le système d'équations linéaires étudié
+ * lines_link : La matrice des adresses du système d'équations linéaires
+*/
 float* get_solution(linear_system* sys, int* lines_link){
 
     float* solution = (float *)malloc(sizeof(float)*sys->len);
