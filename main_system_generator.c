@@ -16,13 +16,13 @@ int main(int argc, char const *argv[])
 
     
     int count = 1;
-    if(argc == 3 ){
-        count = atoi(argv[3]);
+    if(argc == 2 ){
+        count = atoi(argv[2]);
     }
 
     int len = 30;
-    if(argc > 1 ){
-        len = atoi(argv[2]);
+    if(argc > 0 ){
+        len = atoi(argv[1]);
     }
 
     linear_system* sys;
