@@ -1,6 +1,11 @@
 #include "linear_system.h"
 #include <time.h>
 // Taille en entier, tout le reste en float
+/**
+ * Permet de lire un fichier de système d'équations linéaires en mémoire
+ * sys : La variable dans laquelle stocker le système
+ * path : le chemin vers le fichier txt du système d'équations linéaires
+*/
 void read_system(linear_system* system, char* path){
     FILE * f;
     f = fopen(path,"r");
@@ -29,6 +34,11 @@ void read_system(linear_system* system, char* path){
 
 // utilisé uniquement par le générateur normalement 
 // c'est bien une fonction différente de celle utilisée par le solveur 
+/**
+ * Sauvegarde dans un fichier passé en paramètre un système d'équations linéaires
+ * sys : La variable dans laquelle stocker le système
+ * path : le chemin vers le fichier txt du système d'équations linéaires
+*/
 void save_system(linear_system* system, char* path){
     FILE * f;
 
@@ -64,6 +74,10 @@ void free_system(linear_system * system){
     }
 }
 
+/**
+ * Retourne un système d'équations linéaires de longeur len
+ * len : la longueur du système généré 
+*/
 linear_system* generate_system(int len){
     linear_system * syst;
 
