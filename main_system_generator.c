@@ -1,5 +1,5 @@
 #include "linear_system.h"
-#include "iterative_solver.h"
+#include "solver.h"
 #include <time.h>
 
 // main generateur de systemes
@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
 
     if (argc > 2)
     {
-        printf("Utilisation : system_generator LEN NB\nAvec :\n\tLEN : La taille des systèmes (Défaut : 30) \n\tNB : Le nombre de systèmes à générer (Défaut : 1)\n");
+        printf("Utilisation : ./generator.exe LEN NB\nAvec :\n\tLEN : La taille des systèmes (Défaut : 30) \n\tNB : Le nombre de systèmes à générer (Défaut : 1)\n");
         return EXIT_SUCCESS;
     }
     char filename[64];

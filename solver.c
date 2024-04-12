@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "iterative_solver.h"
+#include "solver.h"
 
 
 // ! Attention, il existe des cas particulier qui risques de créer des divisions par 0, ce sera à gérer

@@ -1,5 +1,5 @@
-#ifndef ITERATIVE_SOLVER
-#define ITERATIVE_SOLVER
+#ifndef SOLVER_H
+#define SOLVER_H
 #include "linear_system.h"
 int find_pivot_for_row(linear_system* sys, int* lines_link, int row);
 void swap_lines(int* lines_link, int line1, int line2);

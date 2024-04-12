@@ -1,6 +1,9 @@
 ﻿CUDA_linear_equation_system_solver
 =======
 
+## Utilisation
+--> Voir le notebook "demo_notebook"
+
 pivot de gauss
 -> chaque itération : un pivot (1er élément de la diagonale) -> autant d'étapes que de ligne
 n^3
@@ -29,7 +32,7 @@ n = nombre d'inconnues
 
 Exemple :
 
-```.txt file
+```plaintext
 2
 2 1 5
 4 -6 -20
@@ -47,7 +50,7 @@ n = nombre d'inconnues
 
 Exemple :
 
-```.txt file
+```plaintext
 2
 1 0.5 2.5
 -8 -30
