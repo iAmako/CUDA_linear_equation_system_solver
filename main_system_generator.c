@@ -8,7 +8,7 @@
 
 int main(int argc, char const *argv[])
 {
-    if (argc > 3)
+    if (argc < 3)
     {
         printf("Utilisation : ./generator.exe LEN NB\nAvec :\n\tLEN : La taille des systèmes (Défaut : 30) \n\tNB : Le nombre de systèmes à générer (Défaut : 1)\n");
         return EXIT_SUCCESS;
@@ -19,12 +19,12 @@ int main(int argc, char const *argv[])
     struct tm *time_str;
     int len = 30;
     if(argc > 2 ){
-        len = atoi(argv[2]);
+        len = atoi(argv[1]);
     }
     int count = 1;
     if (argc == 3)
     {
-        count = atoi(argv[3]);
+        count = atoi(argv[2]);
     }
 
 
@@ -43,6 +43,7 @@ int main(int argc, char const *argv[])
         sys = generate_system(len);
         save_system(sys, filename);
         free_system(sys);
+        fprintf(stdout, "%s crée \n",filename);
     }
 
     return 0;

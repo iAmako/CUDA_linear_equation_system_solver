@@ -1,6 +1,15 @@
 #include "linear_system.h"
 #include "solver.h"
-#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+
+double wtime(void)
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return tv.tv_sec + tv.tv_usec * 1e-6;
+}
 
 //main solveur de système 
 int main(int argc, char const *argv[])
@@ -32,9 +41,12 @@ int main(int argc, char const *argv[])
     char save_path[64];
     snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
 
-    //Calculs & sauvegarde    
+    //Calculs & sauvegarde
+    double tic = wtime();
     solve_system(sys,save_path,verbose);
+    double tac = wtime();
 
+    printf("%lf s \n",tac-tic);
     //Libération de la mémoire
     free_system(sys);
 

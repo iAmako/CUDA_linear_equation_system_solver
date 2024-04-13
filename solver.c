@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "solver.h"
+#include <omp.h>
 
 
 // ! Attention, il existe des cas particulier qui risques de créer des divisions par 0, ce sera à gérer
@@ -46,6 +47,7 @@ void solve_system(linear_system* system, char* path, int verbose){
             swap_lines(lines_link, pivot_line, pivot_row);
         }
         
+        #pragma omp parallel for num_threads(8)
         for(int line_to_change = pivot_row+1; line_to_change < system->len; line_to_change++){
             apply_pivot_to_line(system, lines_link, line_to_change, pivot_row);
         }
