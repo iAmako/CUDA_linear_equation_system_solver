@@ -31,7 +31,10 @@ int main(int argc, char const *argv[])
     linear_system* sys;
     sys = (linear_system *)malloc(sizeof(linear_system));
 
-    read_system(sys,read_path);
+    if( ! (read_system(sys,read_path))){
+        printf("Erreur lors de la lecture du fichier \n");
+        return EXIT_SUCCESS;
+    }
     
     char save_path[64];
     snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 

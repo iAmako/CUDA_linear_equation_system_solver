@@ -11,7 +11,7 @@ typedef struct linear_system_struct
     int len;
 } linear_system ;
 
-void read_system(linear_system* system, char* path);
+int read_system(linear_system* system, char* path);
 void save_system(linear_system* system, char* path);
 void print_system(linear_system* system);
 void free_system(linear_system * system);

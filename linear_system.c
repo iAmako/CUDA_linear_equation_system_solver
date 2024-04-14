@@ -6,10 +6,10 @@
  * sys : La variable dans laquelle stocker le système
  * path : le chemin vers le fichier txt du système d'équations linéaires
 */
-void read_system(linear_system* system, char* path){
+int read_system(linear_system* system, char* path){
     FILE * f;
     f = fopen(path,"r");
-    
+    int file_read = 0;
     
 
     if( ! (f == NULL)){
@@ -28,8 +28,10 @@ void read_system(linear_system* system, char* path){
             }
             
         }
+        file_read = 1
     }
     fclose(f);
+    return file_read;
 }
 
 // utilisé uniquement par le générateur normalement 
