@@ -30,28 +30,27 @@ void solve_system(linear_system* system, char* path, int verbose){
 
 
     lines_link = (int*)malloc(system->len * sizeof(int));
-    
+
     for (int i = 0; i < system->len; i++)
     {
         lines_link[i] = i;
     }
     
 
-    for(int pivot_row = 0; pivot_row < system->len-1; pivot_row++){
+    for(int pivot_row = 0; pivot_row < system->len-1  ; pivot_row++){
 
-        //Recherche du pivot
+        //Recherche du pivot sur n ligne 
         pivot_line = find_pivot_for_row(system, lines_link , pivot_row);
-
+            
         //Echange des lignes si besoin
         if(pivot_line != pivot_row){
             swap_lines(lines_link, pivot_line, pivot_row);
         }
-        
-        #pragma omp parallel for num_threads(8)
-        for(int line_to_change = pivot_row+1; line_to_change < system->len; line_to_change++){
-            apply_pivot_to_line(system, lines_link, line_to_change, pivot_row);
-        }
 
+        for(int line_to_change = pivot_row+1; line_to_change < system->len; line_to_change++){
+             apply_pivot_to_line(system, lines_link, line_to_change, pivot_row);
+        }
+        
     }
 
 
@@ -62,7 +61,64 @@ void solve_system(linear_system* system, char* path, int verbose){
     free(lines_link);
 }
 
-// Renvoies la ligne du pivot
+
+void solve_system_parallel(linear_system* system, char* path, int verbose){
+    #ifdef _OPENMP
+    int* pivot_line;
+    int* lines_link;
+
+    int num_threads = omp_get_max_threads();
+
+    pivot_line = (int *)malloc(sizeof(int)*num_threads);
+    for(int i = 0 ; i < num_threads;i++){
+        pivot_line[i] = 0;
+    }
+
+    lines_link = (int*)malloc(system->len * sizeof(int));
+    for (int i = 0; i < system->len; i++)
+    {
+        lines_link[i] = i;
+    }
+    
+
+    for(int pivot_row = 0; pivot_row < system->len-1  ; pivot_row += num_threads){
+
+        //Recherche du pivot sur n ligne 
+        #pragma omp parallel
+        {
+        
+            pivot_line[omp_get_thread_num()] = find_pivot_for_row(system, lines_link , pivot_row+omp_get_thread_num());
+            
+        }
+        
+        
+        for(int i = 0 ; i < num_threads && pivot_row+i < system->len ; i++){
+            //Echange des lignes si besoin
+            if(pivot_line[i] != pivot_row+i){
+                swap_lines(lines_link, pivot_line[i], pivot_row+i);
+            }
+
+            #pragma omp parallel for 
+            for(int line_to_change = pivot_row+i+1; line_to_change < system->len; line_to_change++){
+                apply_pivot_to_line(system, lines_link, line_to_change, pivot_row+i);
+            }
+        }
+
+    }
+
+
+    save_solution(system, lines_link, path);
+    if(verbose > 0){
+        printf("Solution sauvegardée : %.64s\n",path);
+    }
+    free(lines_link);
+    free(pivot_line);
+
+    #endif
+}
+
+
+// Renvoie la ligne du pivot
 // row -> la colonne du pivot
 // La ligne pivot est celle détenant la plus grande valeur sur la colonne recherchée
 /**
@@ -149,7 +205,7 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
     // Sauvegarde des nouvelles équations
     for (int i = 0; i < sys->len; i++)
     {
-        for (int j = 0; j < sys->len; j++)
+        for (int j = 0; j <= sys->len; j++)
         {
             fprintf(f,"%f ",sys->equation[lines_link[i]][j]);
         }

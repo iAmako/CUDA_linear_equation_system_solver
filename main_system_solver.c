@@ -46,9 +46,25 @@ int main(int argc, char const *argv[])
     solve_system(sys,save_path,verbose);
     double tac = wtime();
 
-    printf("%lf s \n",tac-tic);
+
+    printf("%lf s Iteratif \n",tac-tic);
     //Libération de la mémoire
     free_system(sys);
+
+    #ifdef _OPENMP
+    sys = (linear_system *)malloc(sizeof(linear_system));
+
+    read_system(sys,read_path);
+
+    //Calculs & sauvegarde
+    tic = wtime();
+    solve_system_parallel(sys,save_path,verbose);
+    tac = wtime();
+
+    printf("%lf s OPENMP \n",tac-tic);
+    //Libération de la mémoire
+    free_system(sys);
+    #endif
 
     return 0;
 }
