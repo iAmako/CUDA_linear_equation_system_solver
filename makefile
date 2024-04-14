@@ -1,14 +1,11 @@
 CC=gcc
 DEBUG=yes
 
-CFLAGS=-W -Wall -pedantic 
-
+CFLAGS=-W -Wall -pedantic -O2 -fopenmp
+LDFLAGS = -fopenmp
 
 ifeq ($(DEBUG),yes)
 	CFLAGS+= -g 
-else
-	CFLAGS += -O2 -fopenmp
-	LDFLAGS = -fopenmp
 endif
 
 EXEC=solver.exe generator.exe

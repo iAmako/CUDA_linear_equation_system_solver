@@ -2,14 +2,9 @@
 #include "solver.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
 
-double wtime(void)
-{
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  return tv.tv_sec + tv.tv_usec * 1e-6;
-}
+
+
 
 //main solveur de système 
 int main(int argc, char const *argv[])
@@ -42,12 +37,12 @@ int main(int argc, char const *argv[])
     snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
 
     //Calculs & sauvegarde
-    double tic = wtime();
+    
     solve_system(sys,save_path,verbose);
-    double tac = wtime();
+    
 
 
-    printf("%lf s Iteratif \n",tac-tic);
+   
     //Libération de la mémoire
     free_system(sys);
 
@@ -57,11 +52,11 @@ int main(int argc, char const *argv[])
     read_system(sys,read_path);
 
     //Calculs & sauvegarde
-    tic = wtime();
+   
     solve_system_parallel(sys,save_path,verbose);
-    tac = wtime();
+  
 
-    printf("%lf s OPENMP \n",tac-tic);
+    
     //Libération de la mémoire
     free_system(sys);
     #endif

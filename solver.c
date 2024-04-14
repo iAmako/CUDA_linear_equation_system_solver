@@ -2,10 +2,18 @@
 #include <stdlib.h>
 #include "solver.h"
 #include <omp.h>
-
+#include <sys/time.h>
 
 // ! Attention, il existe des cas particulier qui risques de créer des divisions par 0, ce sera à gérer
 // exemple : ligne qui est le multiple d'une autre 
+
+
+double wtime(void)
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return tv.tv_sec + tv.tv_usec * 1e-6;
+}
 
 
 // boucle des colonnes 
@@ -36,7 +44,7 @@ void solve_system(linear_system* system, char* path, int verbose){
         lines_link[i] = i;
     }
     
-
+    double tic = wtime();
     for(int pivot_row = 0; pivot_row < system->len-1  ; pivot_row++){
 
         //Recherche du pivot sur n ligne 
@@ -52,7 +60,9 @@ void solve_system(linear_system* system, char* path, int verbose){
         }
         
     }
+    double tac = wtime();
 
+    printf("%lf s Iteratif \n",tac-tic);
 
     save_solution(system, lines_link, path);
     if(verbose > 0){
@@ -80,32 +90,37 @@ void solve_system_parallel(linear_system* system, char* path, int verbose){
         lines_link[i] = i;
     }
     
-
+    double tic = wtime();
     for(int pivot_row = 0; pivot_row < system->len-1  ; pivot_row += num_threads){
+        
 
+        
         //Recherche du pivot sur n ligne 
         #pragma omp parallel
         {
-        
-            pivot_line[omp_get_thread_num()] = find_pivot_for_row(system, lines_link , pivot_row+omp_get_thread_num());
+            //Vérification dépassement
+            if(pivot_row+omp_get_thread_num() < system->len-1)
+                pivot_line[omp_get_thread_num()] = find_pivot_for_row(system, lines_link , pivot_row+omp_get_thread_num());
             
         }
         
         
         for(int i = 0 ; i < num_threads && pivot_row+i < system->len ; i++){
-            //Echange des lignes si besoin
-            if(pivot_line[i] != pivot_row+i){
-                swap_lines(lines_link, pivot_line[i], pivot_row+i);
-            }
+            if(pivot_row+i < system->len-1){
+                //Echange des lignes si besoin
+                if(pivot_line[i] != pivot_row+i){
+                    swap_lines(lines_link, pivot_line[i], pivot_row+i);
+                }
 
-            #pragma omp parallel for 
-            for(int line_to_change = pivot_row+i+1; line_to_change < system->len; line_to_change++){
-                apply_pivot_to_line(system, lines_link, line_to_change, pivot_row+i);
+                #pragma omp parallel for 
+                for(int line_to_change = pivot_row+i+1; line_to_change < system->len; line_to_change++){
+                    apply_pivot_to_line(system, lines_link, line_to_change, pivot_row+i);
+                }
             }
         }
-
     }
-
+    double tac = wtime();
+    printf("%lf s OPENMP \n",tac-tic);
 
     save_solution(system, lines_link, path);
     if(verbose > 0){
