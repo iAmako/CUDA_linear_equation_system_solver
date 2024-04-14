@@ -49,6 +49,7 @@ void solve_system(linear_system* system, char* path, int verbose){
 
         //Recherche du pivot sur n ligne 
         pivot_line = find_pivot_for_row(system, lines_link , pivot_row);
+        
             
         //Echange des lignes si besoin
         if(pivot_line != pivot_row){
@@ -201,7 +202,6 @@ void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, i
 // ligne 1 : n = la taille 
 // lignes 2 -> n+1 les n prochaines ligne (juste dans l'ordre, pas besoin de lines link vu qu'on a pas changé l'ordre dans la mémoire)
 // ligne n+2 -> la solution  (besoin de lines_link)
-// à vérifier
 /**
  * Sauvegarde la solution du système d'équations linéaires 
  * sys : le système d'équations linéaires étudié

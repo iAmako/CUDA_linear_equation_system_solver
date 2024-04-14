@@ -14,9 +14,9 @@ int read_system(linear_system* system, char* path){
 
     if( ! (f == NULL)){
         //Recupération du nb de variables
-        fscanf(f,"%d \n",&system->len);
-
-
+        if(! (fscanf(f,"%d \n",&system->len) ))
+            return file_read;
+        
         //On alloue le tableau qui stocke les équations
         system->equation = (float **)malloc(sizeof(float *)*system->len);
 
@@ -24,13 +24,14 @@ int read_system(linear_system* system, char* path){
         for(int i = 0 ; i < system->len ; i++){
             system->equation[i] = (float *)malloc(sizeof(float )*(system->len+1));
             for(int j = 0 ; j < system->len+1 ; j++){
-                fscanf(f,"%f",&system->equation[i][j]);
+                if(! (fscanf(f,"%f",&system->equation[i][j])))
+                    return file_read;
             }
             
         }
-        file_read = 1
+        file_read = 1;
+        fclose(f);
     }
-    fclose(f);
     return file_read;
 }
 

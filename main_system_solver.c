@@ -10,7 +10,7 @@
 int main(int argc, char const *argv[])
 {
 
-    if(argc < 1 || argc > 2){
+    if(argc < 2){
         printf("Utilisation : ./solver.exe PATH VERBOSE\nAvec :\n\tPATH : Chemin vers le fichier\n\tVERBOSE : Le niveau d'affichage du programme (optionnel, défaut = 1)\n");
         return EXIT_SUCCESS;
     }
