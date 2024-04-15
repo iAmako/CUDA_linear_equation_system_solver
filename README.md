@@ -4,23 +4,10 @@
 ## Utilisation
 --> Voir le notebook "demo_notebook"
 
-pivot de gauss
--> chaque itération : un pivot (1er élément de la diagonale) -> autant d'étapes que de ligne
-n^3
-->projet : code c
+## Avant de push le notebook 
+Avant de push le notebook il faut penser à en retirer les metadata avec l'outil "nbstripout"
 
-1) itératif (avec tooutes les bonnes propriétés)
-1.1) générer des systèmes
-1.2) diagonaliser la matrice
-    1.2.1) trouver pivot (plus gros coeff) et inversion si besoin est
-    1.2.2) propager pivot
-1.5) enregistrer données
-documentation / commentaires propres :)
-2) parallèle
-chacune des lignes peut être traitées en parallèle après le pivot -> openmp (pas pour le 8)
-théoriquement, pas loin du #pragma omp parallel for ?  
-3) gpu
-la suite au prochain épisode
+## Format des fichiers
 
 Format d'un fichier d'entrée
 -----------
@@ -58,5 +45,3 @@ Exemple :
 ```
 
 -----------
-
-TODO -> pour le 8 : générer 10 matrices + 10 résultats
