@@ -1,6 +1,10 @@
 ﻿CUDA_linear_equation_system_solver
 =======
 
+Auteurs : 
+- Alexis LABILLE 
+- Kilyan SLOWINSKI 
+
 ## Utilisation
 --> Voir le notebook "demo_notebook"
 
