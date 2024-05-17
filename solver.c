@@ -50,13 +50,17 @@ void solve_system(linear_system* system, char* path, int verbose){
         //Recherche du pivot sur n ligne 
         pivot_line = find_pivot_for_row(system, lines_link , pivot_row);
         
+        if(verbose > 1) printf("ligne pivot : %d\n",pivot_line);
             
         //Echange des lignes si besoin
         if(pivot_line != pivot_row){
+            if(verbose > 1) printf("échange des lignes %d et %d\n",lines_link[pivot_line],lines_link[pivot_row]);
+
             swap_lines(lines_link, pivot_line, pivot_row);
         }
 
         for(int line_to_change = pivot_row+1; line_to_change < system->len; line_to_change++){
+            if(verbose > 2) printf("application du pivot sur la ligne %d\n", lines_link[line_to_change]);
              apply_pivot_to_line(system, lines_link, line_to_change, pivot_row);
         }
         
@@ -217,6 +221,7 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
     // Sauvegarde de la taille
     fprintf(f,"%d\n",sys->len);
 
+    /* //à remettre 
     // Sauvegarde des nouvelles équations
     for (int i = 0; i < sys->len; i++)
     {
@@ -226,7 +231,8 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
         }
         fprintf(f,"\n");
     }
-        
+    */
+
     // Sauvegarde de la solution
     double* solution;
     solution = get_solution(sys, lines_link);

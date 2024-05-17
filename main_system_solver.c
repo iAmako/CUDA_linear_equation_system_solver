@@ -29,6 +29,7 @@ int main(int argc, char const *argv[])
     
     //Lecture du fichier    
     linear_system* sys;
+    
     sys = (linear_system *)malloc(sizeof(linear_system));
 
     if( ! (read_system(sys,read_path))){
