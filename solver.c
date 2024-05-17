@@ -220,13 +220,13 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
     // Sauvegarde des nouvelles équations
     for (int i = 0; i < sys->len; i++)
     {
-        for (int j = 0; j <= sys->len; j++)
+        for (int j = i; j <= sys->len; j++)
         {
             fprintf(f,"%lf ",sys->equation[lines_link[i]][j]);
         }
         fprintf(f,"\n");
     }
-    
+        
     // Sauvegarde de la solution
     double* solution;
     solution = get_solution(sys, lines_link);
