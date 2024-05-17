@@ -186,7 +186,7 @@ void swap_lines(int* lines_link, int line1, int line2){
 void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, int pivot_row){
     
     // Calcul du coefficient
-    float multiplier = 1.0f; 
+    double multiplier = 1.0f; 
     multiplier = sys->equation[lines_link[target_line]][pivot_row] / sys->equation[lines_link[pivot_row]][pivot_row];
     
     // Application du pivot sur la ligne
@@ -222,17 +222,17 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
     {
         for (int j = 0; j <= sys->len; j++)
         {
-            fprintf(f,"%f ",sys->equation[lines_link[i]][j]);
+            fprintf(f,"%lf ",sys->equation[lines_link[i]][j]);
         }
         fprintf(f,"\n");
     }
     
     // Sauvegarde de la solution
-    float* solution;
+    double* solution;
     solution = get_solution(sys, lines_link);
     for (int i = 0; i < sys->len; i++)
     {
-        fprintf(f,"%f ",solution[i]);
+        fprintf(f,"%lf ",solution[i]);
     }
 
     // Libération de la mémoire 
@@ -250,10 +250,10 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
  * sys : le système d'équations linéaires étudié
  * lines_link : La matrice des adresses du système d'équations linéaires
 */
-float* get_solution(linear_system* sys, int* lines_link){
+double* get_solution(linear_system* sys, int* lines_link){
 
-    float* solution = (float *)malloc(sizeof(float)*sys->len);
-    float tmp_membre_droit;
+    double* solution = (double *)malloc(sizeof(double)*sys->len);
+    double tmp_membre_droit;
     for (int i = sys->len-1; i >= 0; i--)
     {
         // On récupère le membre de droite dans l'équation dans tous les cas 

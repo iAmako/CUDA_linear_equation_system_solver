@@ -1,5 +1,5 @@
 CC=gcc
-DEBUG=yes
+DEBUG=no
 
 CFLAGS=-W -Wall -pedantic -O2 -fopenmp
 LDFLAGS = -fopenmp

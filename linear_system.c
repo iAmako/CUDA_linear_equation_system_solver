@@ -1,6 +1,6 @@
 #include "linear_system.h"
 #include <time.h>
-// Taille en entier, tout le reste en float
+// Taille en entier, tout le reste en double
 /**
  * Permet de lire un fichier de système d'équations linéaires en mémoire
  * sys : La variable dans laquelle stocker le système
@@ -18,13 +18,13 @@ int read_system(linear_system* system, char* path){
             return file_read;
         
         //On alloue le tableau qui stocke les équations
-        system->equation = (float **)malloc(sizeof(float *)*system->len);
+        system->equation = (double **)malloc(sizeof(double *)*system->len);
 
         //Lecture et remplissage ligne à ligne, /!\ double boucle potentiellement lente.
         for(int i = 0 ; i < system->len ; i++){
-            system->equation[i] = (float *)malloc(sizeof(float )*(system->len+1));
+            system->equation[i] = (double *)malloc(sizeof(double )*(system->len+1));
             for(int j = 0 ; j < system->len+1 ; j++){
-                if(! (fscanf(f,"%f",&system->equation[i][j])))
+                if(! (fscanf(f,"%lf",&system->equation[i][j])))
                     return file_read;
             }
             
@@ -51,7 +51,7 @@ void save_system(linear_system* system, char* path){
 
     for(int i = 0 ; i < system->len ; i++){
         for(int j = 0 ; j < system->len+1 ; j++){
-            fprintf(f,"%f ",system->equation[i][j]);
+            fprintf(f,"%lf ",system->equation[i][j]);
         }
         fprintf(f,"%s","\n"); 
     }
@@ -62,7 +62,7 @@ void save_system(linear_system* system, char* path){
 void print_system(linear_system* system){
     for(int i = 0 ; i < system->len;i++){
         for(int j = 0 ; j < system->len+1;j++){
-            printf("%f ",system->equation[i][j]);
+            printf("%lf ",system->equation[i][j]);
         }
         printf("\n");
     }
@@ -86,15 +86,15 @@ linear_system* generate_system(int len){
 
     syst = (linear_system *)malloc(sizeof(linear_system));
     syst->len = len;
-    syst->equation = (float **)malloc(sizeof(float *)*syst->len);
+    syst->equation = (double **)malloc(sizeof(double *)*syst->len);
 
     for(int i = 0 ; i < len ; i++){
-        syst->equation[i] = (float *)malloc(sizeof(float )*(syst->len+1));
+        syst->equation[i] = (double *)malloc(sizeof(double )*(syst->len+1));
 
     }
     //Generation des valeurs des variables 
     srand(time(NULL));
-    float * tab_var = (float *)malloc(sizeof(float)*len);
+    double * tab_var = (double *)malloc(sizeof(double)*len);
 
     for(int i = 0 ; i < len ; i++){
         //Déf arbitraire de l'intervalle [-25 ;25], potentiellement 0 (problème ? j'pense pas mais voilà)

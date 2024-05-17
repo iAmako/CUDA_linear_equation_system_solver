@@ -7,7 +7,7 @@
 
 typedef struct linear_system_struct
 {
-    float** equation;
+    double** equation;
     int len;
 } linear_system ;
 
