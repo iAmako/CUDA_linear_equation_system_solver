@@ -22,7 +22,6 @@ double wtime(void)
 //      pour chaque ligne suivante, additioner / soustraire la ligne qu'on target par la valeur en colonne i ligne target divisé par la valeur réelle du pivot 
 // 
 //      !! -> garder en mémoire les lignes qu'on swap, (tableau d'entier par lequel on passe pour obtenir les valeurs ?)
-// WIP
 // system : le système à solve
 // path : le path vers le fichier de sortie, qui contiendra la solution
 // verbose : sortie uniquement dans le fichier de sortie si verbose = 0, infos basiques dans la sortie standard si verbose = 1, infos avancée si verbose = 2 (à implémenter)
@@ -145,14 +144,14 @@ void solve_system_parallel(linear_system* system, char* path, int verbose){
 */
 int find_pivot_for_row(linear_system* sys, int* lines_link, int row){
     int pivot_line = row;
-    int pivot_value = sys->equation[lines_link[row]][row];
+    int pivot_value = abs(sys->equation[lines_link[row]][row]);
     int cur_value = 0;
     for (int cur_line = row+1; cur_line < sys->len; cur_line++)
     {
         cur_value = sys->equation[lines_link[cur_line]][row];
-        if(cur_value > pivot_value){
+        if(abs(cur_value) > pivot_value){
             pivot_line = cur_line;
-            pivot_value = cur_value;
+            pivot_value = abs(cur_value);
         }
     }
     return pivot_line;
