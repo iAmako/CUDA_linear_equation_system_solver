@@ -3,6 +3,7 @@
 #include "solver.h"
 #include <omp.h>
 #include <sys/time.h>
+#include <math.h>
 
 // ! Attention, il existe des cas particulier qui risques de créer des divisions par 0, ce sera à gérer
 // exemple : ligne qui est le multiple d'une autre 
@@ -144,14 +145,14 @@ void solve_system_parallel(linear_system* system, char* path, int verbose){
 */
 int find_pivot_for_row(linear_system* sys, int* lines_link, int row){
     int pivot_line = row;
-    int pivot_value = abs(sys->equation[lines_link[row]][row]);
-    int cur_value = 0;
+    double pivot_value = fabs(sys->equation[lines_link[row]][row]);
+    double cur_value = 0;
     for (int cur_line = row+1; cur_line < sys->len; cur_line++)
     {
         cur_value = sys->equation[lines_link[cur_line]][row];
-        if(abs(cur_value) > pivot_value){
+        if(fabs(cur_value) > pivot_value){
             pivot_line = cur_line;
-            pivot_value = abs(cur_value);
+            pivot_value = fabs(cur_value);
         }
     }
     return pivot_line;
