@@ -1,19 +1,23 @@
-CC=gcc
+CC=nvcc
 DEBUG=no
 
-CFLAGS=-W -Wall -pedantic -O2 -fopenmp
-LDFLAGS = -fopenmp
+CFLAGS= #-Xptxas -O2 -use_fast_math
+LDFLAGS = #-Xptxas -O2 -use_fast_math
 
 ifeq ($(DEBUG),yes)
 	CFLAGS+= -g 
 endif
 
-EXEC=solver.exe generator.exe
-SRC_SOLV = $(filter-out main_system_generator.c, $(wildcard *.c))
+EXEC= solver_cuda.exe #solver.exe# generator.exe 
+#SRC_SOLV = $(filter-out main_system_generator.c, $(wildcard *.c))
+#OBJ_SOLV = $(SRC_SOLV:.c=.o)
+
+#SRC_GEN = $(filter-out main_system_solver.c, $(wildcard *.c))
+#OBJ_GEN = $(SRC_GEN:.c=.o)
+
+SRC_SOLV = $(filter-out main_system_solver_cuda.cu, $(wildcard *.c*))
 OBJ_SOLV = $(SRC_SOLV:.c=.o)
 
-SRC_GEN = $(filter-out main_system_solver.c, $(wildcard *.c))
-OBJ_GEN = $(SRC_GEN:.c=.o)
 
 all: $(EXEC)
 
@@ -23,11 +27,14 @@ else
 	@echo "Generation en mode release"
 endif
 
-solver.exe: $(OBJ_SOLV)
+#solver.exe: $(OBJ_SOLV)
+#	@$(CC) -o $@ $^ $(LDFLAGS)
+
+solver_cuda.exe: $(OBJ_SOLV)
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
-generator.exe: $(OBJ_GEN) 
-	@$(CC) -o $@ $^ $(LDFLAGS)
+#generator.exe: $(OBJ_GEN) 
+#	@$(CC) -o $@ $^ $(LDFLAGS)
 	
 %.o: %.c
 	@$(CC) -o $@ -c $< $(CFLAGS)

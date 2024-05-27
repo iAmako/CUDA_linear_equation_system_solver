@@ -23,7 +23,6 @@ int main(int argc, char const *argv[])
     char read_path[64];
     snprintf(read_path,sizeof(read_path),"%s",argv[1]);
     
-    
     //Lecture du fichier    
     linear_system* sys;
     
@@ -38,29 +37,9 @@ int main(int argc, char const *argv[])
     snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
 
     //Calculs & sauvegarde
-    
-    solve_system(sys,save_path,verbose);
-    
+    solve_system_cuda(sys,save_path,verbose);
 
-
-   
     //Libération de la mémoire
     free_system(sys);
-/*
-    #ifdef _OPENMP
-    sys = (linear_system *)malloc(sizeof(linear_system));
-
-    read_system(sys,read_path);
-
-    //Calculs & sauvegarde
-   
-    solve_system_parallel(sys,save_path,verbose);
-  
-
-    
-    //Libération de la mémoire
-    free_system(sys);
-    #endif
-*/
     return 0;
 }
