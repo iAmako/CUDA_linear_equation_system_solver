@@ -1,7 +1,8 @@
 #include "linear_system.h"
-#include "solver_cuda.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "solver.h"
+#include <omp.h>
 
 //main solveur de système 
 int main(int argc, char const *argv[])
@@ -46,7 +47,7 @@ int main(int argc, char const *argv[])
    
     //Libération de la mémoire
     free_system(sys);
-/*
+
     #ifdef _OPENMP
     sys = (linear_system *)malloc(sizeof(linear_system));
 
@@ -61,6 +62,6 @@ int main(int argc, char const *argv[])
     //Libération de la mémoire
     free_system(sys);
     #endif
-*/
+
     return 0;
 }

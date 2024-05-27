@@ -374,7 +374,7 @@ void solve_system(linear_system* system, char* path, int verbose){
     }
     double tac = wtime();
 
-    printf("%lf s Iteratif \n",tac-tic);
+    printf("%lf s CUDA \n",tac-tic);
 
     save_solution(system, lines_link, path);
     if(verbose > 0){
