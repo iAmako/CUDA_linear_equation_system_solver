@@ -1,4 +1,3 @@
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,7 +77,7 @@ void save_system(linear_system* system, char* path){
     fclose(f);
 
 }
-void print_system(linear_system* system){
+__device__ void print_system(linear_system* system){
     for(int i = 0 ; i < system->len;i++){
         for(int j = 0 ; j < system->len+1;j++){
             printf("%lf ",system->equation[i][j]);
@@ -187,17 +186,17 @@ void swap_lines(int* lines_link, int line1, int line2){
  * target_line : la ligne sur laquelle appliquer le pivot 
  * pivot_row : la colonne du pivot 
 */
-__device__ void apply_pivot_to_line(linear_system* sys, int* lines_link, int target_line, int pivot_row){
+__device__ void apply_pivot_to_line(double* matrix, int len, int* lines_link, int target_line, int pivot_row){
     
     // Calcul du coefficient
     double multiplier = 1.0f; 
-    multiplier = sys->equation[lines_link[target_line]][pivot_row] / sys->equation[lines_link[pivot_row]][pivot_row];
+    multiplier = matrix[lines_link[target_line] * len+ pivot_row] /matrix[lines_link[pivot_row] * len+ pivot_row];
     
     // Application du pivot sur la ligne
     // C'est bien sys->len+1 pour modifier l'entièreté de l'équation en prenant en compte le résultat 
-    for (int i = 0; i < sys->len+1; i++)
+    for (int i = 0; i < len+1; i++)
     {
-        sys->equation[lines_link[target_line]][i] = sys->equation[lines_link[target_line]][i] - multiplier * sys->equation[lines_link[pivot_row]][i];
+        matrix[lines_link[target_line]*len + i] = matrix[lines_link[target_line]*len +i] - multiplier * matrix[lines_link[pivot_row] + i];
     }
     
 }
@@ -280,10 +279,10 @@ void save_solution(linear_system* sys, int* lines_link, char* path){
 }
 
 
-__global__ void ApplyPivotToLinesKernel(linear_system* d_system, int* lines_link, int pivot_row){
+__global__ void ApplyPivotToLinesKernel(double* matrix, int len, int* lines_link, int pivot_row){
     int i = blockIdx.x * blockDim.x + threadIdx.x + 1 + pivot_row;
-    if(i < d_system->len){
-        apply_pivot_to_line(d_system,lines_link,i,pivot_row);
+    if(i < len){
+        apply_pivot_to_line(matrix,len,lines_link,i,pivot_row);
     }
 }
 //a passer sur GPU
@@ -293,14 +292,33 @@ for(int i = pivot_row+1; i < system->len; i++){
 }
 */
 
-
 void solve_system(linear_system* system, char* path, int verbose){
     int pivot_line = 0;
     int* lines_link;
 
     int threadsPerBlock = 128;
     int blocksPerGrid = 1;
-    linear_system* d_system;
+
+
+    int * d_lines_link;
+    double * d_sysequation;
+
+    int len = system->len;
+
+    double * equation_line = (double *)malloc(sizeof(double)*len*(len+1));
+
+    for (int i = 0; i < len; i++) {
+        for (int j = 0; j < len; j++) {
+           equation_line[i * len + j] = system->equation[i][j];
+        }
+        equation_line[i * len + len] = system->equation[i][len]; 
+    }
+
+    cudaMalloc((void**)&d_sysequation , len * (len+1) * sizeof(double ));
+
+    cudaMalloc((void**)&d_lines_link , len * sizeof(int));
+
+
 
 
     lines_link = (int*)malloc(system->len * sizeof(int));
@@ -325,18 +343,34 @@ void solve_system(linear_system* system, char* path, int verbose){
             swap_lines(lines_link, pivot_line, pivot_row);
         }
 
+        
+        cudaMemcpy( d_sysequation, equation_line, (len+1) * sizeof(double), cudaMemcpyHostToDevice);
+        
+        cudaMemcpy(d_lines_link , lines_link,len * sizeof(int),cudaMemcpyHostToDevice);
 
-        cudaMemcpy(system, d_system, sizeof(linear_system), cudaMemcpyHostToDevice);
-
-        ApplyPivotToLinesKernel<<<blocksPerGrid, threadsPerBlock>>>(d_system, lines_link, pivot_row);
+        ApplyPivotToLinesKernel<<<blocksPerGrid, threadsPerBlock>>>(d_sysequation, len, d_lines_link, pivot_row);
         //a passer sur GPU
         /*
         for(int i = pivot_row+1; i < system->len; i++){
              apply_pivot_to_line(system, lines_link, i, pivot_row);
         }
         */
-        cudaMemcpy(system, d_system, sizeof(linear_system), cudaMemcpyDeviceToHost);
+
+       //cudaDeviceSynchronize();
         
+        cudaMemcpy(equation_line, d_sysequation, len * (len+1) * sizeof(double), cudaMemcpyDeviceToHost);
+        
+        cudaMemcpy(lines_link,d_lines_link , len * sizeof(int),cudaMemcpyDeviceToHost);
+
+
+    for (int i = 0; i < len; i++) {
+        for (int j = 0; j < len; j++) {
+           system->equation[i][j]= equation_line[i * len + j] ;
+        }
+        system->equation[i][len]=equation_line[i * len + len]; 
+    }
+
+
     }
     double tac = wtime();
 
@@ -347,7 +381,8 @@ void solve_system(linear_system* system, char* path, int verbose){
         printf("Solution sauvegardée : %.64s\n",path);
     }
     free(lines_link);
-    cudaFree(d_system);
+    cudaFree(d_lines_link);
+    cudaFree(d_sysequation);
 }
 
 
