@@ -8,7 +8,7 @@ ifeq ($(DEBUG),yes)
 	CFLAGS+= -g 
 endif
 
-EXEC= solver.exe solver_omp.exe generator.exe 
+EXEC= solver.exe #solver_omp.exe generator.exe 
 SRC_SOLV = $(filter-out main_system_generator.c, $(wildcard *.c))
 OBJ_SOLV = $(SRC_SOLV:.c=.o)
 
@@ -33,15 +33,15 @@ endif
 solver.exe: $(OBJ_SOLV)
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
-solver_omp.exe: $(OBJ_SOLV)
-	@$(CC) -o $@ $^ $(LDFLAGS)
+#solver_omp.exe: $(OBJ_SOLV_OMP)
+#	@$(CC) -o $@ $^ $(LDFLAGS)
 
 
 #solver_cuda.exe: $(OBJ_SOLV)
 #	@$(CC) -o $@ $^ $(LDFLAGS)
 
-generator.exe: $(OBJ_GEN) 
-	@$(CC) -o $@ $^ $(LDFLAGS)
+#generator.exe: $(OBJ_GEN) 
+#	@$(CC) -o $@ $^ $(LDFLAGS)
 
 #generator.exe: $(OBJ_GEN) 
 #	@$(CC) -o $@ $^ $(LDFLAGS)
