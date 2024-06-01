@@ -12,30 +12,54 @@ double wtime(void)
   return tv.tv_sec + tv.tv_usec * 1e-6;
 }
 
+//TODO
+void save_solution(double ** sys, const int len, char* path){
+    return
+}
 
-__global__ void solve(double** system, int* len){
+//TODO
+__global__ void solve_system(double** system, const int len){
 
 }
 
 int main(void){
-    if(argc < 2){
+    double** h_sys;
+    double** d_sys;
+    int* h_len;
+    char h_read_path[128];
+    char save_path[128];
+
+    if(argc < 1){
         printf("Utilisation : ./solver_cuda.exe PATH\nAvec :\n\tPATH : Chemin vers le fichier\n");
         return EXIT_SUCCESS;
     }
 
-    for(int i= 0 ; i < 5 ; i++){
-        n[i]= i ;
+    //Lecture du fichier & Initialisation
+    snprintf(read_path,sizeof(read_path),"%s",argv[1]);
+    
+    if(!(read_system(sys,len,read_path))){
+        printf("Erreur lors de la lecture du fichier \n");
+        return EXIT_SUCCESS;
     }
 
-    cudaMalloc((void **));
+    //Passage des données sur le device
+    cudaMalloc((void **));...
+    cudaMemcpy(, cudaMemcpyHostToDevice);...
 
-    cudaMemcpy(d_n, n, sizeof(), cudaMemcpyHostToDevice);
+    //Résolution du système
+    solve_system<<<1,1>>>(d_n, const );...
 
-    solve<<<1,1>>>(d_n);
-
-    cudaMemcpy( n, d_n, sizeof(), cudaMemcpyDeviceToHost);
+    //Retour des données sur l'host
+    cudaMemcpy(, cudaMemcpyDeviceToHost);...
     
-    free(n);
-    cudaFree(d_n);
+    //Sauvegarde des résultats
+    snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
+    save_solution(sys, len, save_path);
+
+    //Libération de la mémoire
+    free(h_sys);
+    free(h_len);
+    cudaFree(d_sys);
+
     return 0;   
 }
