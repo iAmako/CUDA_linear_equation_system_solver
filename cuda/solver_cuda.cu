@@ -63,9 +63,41 @@ void save_solution(double * solution, const int len, char* path){
 // INVERSION SI NECESSAIRE
 // PROPAGATION DU PIVOT SUR LES LIGNES A PARTIR DE i
 __global__ void solve_system_kernel(double* d_system, double* d_solution, const int len){
+    __shared__ double max_line;
+    max_line = 0.0;
+
+    int pivot_line;
+    double multiplier = 0.0;
+    double * tmp_line_swap;
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if(tid < len) {
+
+    for(int cur_col = 0 ; cur_col < len ; cur_col++ ){
+        //Culling des threads inutiles, on garde un thread par ligne
+        if(tid < len) {
+
+            //Fuck it we ball calcul du max sur le premier thread parce que les réductions aie 
+            if(tid == 0){
+                for(int i = 0 ; i < len;i++){
+                    if(max_line < fabs( d_system[cur_col + (i*(len+1))])){
+                        max_line = fabs(d_system[cur_col + (i*(len+1))] ) ;
+                        pivot_line = i;
+                    }
+                     
+                    
+                }
+                printf("%lf \n",max_line);
+                //printf("%lf ",max_line);
+                //Swap sur 0, init un tab d'adresse à intervalle len+1 auparavant et swap, plus simple imo
+            }
+            //Chaque thread possède le max et on a rangé le tableau
+            __syncthreads();
+            
+            
+            //Propagation
+         }
+         
     }
+   
 }
 
 
@@ -95,18 +127,15 @@ int main(int argc, char const *argv[]){
     double tic = wtime();
 
    
-    printf("Allocations \n");
     // Allocation de mémoire sur le device
-    cudaMalloc((void **)&d_sys, sizeof(double) * (h_len) * ((h_len) + 1));
+    cudaMalloc((void **)&d_sys, sizeof(double) * (h_len) * (h_len+1) );
     cudaMalloc((void **)&d_solution, sizeof(double) * (h_len));
 
-    printf("On copie le système \n");
     // Copie des données de l'hôte vers le device
     for(int i = 0; i < (h_len); i++) {
-       cudaMemcpy(d_sys + i * ((h_len) + 1),   h_sys[i],    sizeof(double) * ((h_len) + 1)  , cudaMemcpyHostToDevice);
+       cudaMemcpy(d_sys + i * ((h_len) + 1),   h_sys[i],    sizeof(double) * (h_len + 1)  , cudaMemcpyHostToDevice);
     }
 
-    printf("Copie initiale faite \n");
     // Résolution du système
     solve_system_kernel<<<((h_len) + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_sys, d_solution, (h_len));
 
