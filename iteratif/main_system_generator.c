@@ -3,7 +3,7 @@
 #include <time.h>
 
 // main generateur de systemes
-// enregsitré sous ./systems/sys_horodatage.txt
+// enregsitré sous .././systems/sys_horodatage.txt
 // TODO permettre de créer n fichiers avec des tailles allant de x à y (y-x / n = l'augmentation de taille entre chaque itération)
 
 int main(int argc, char const *argv[])
@@ -34,7 +34,7 @@ int main(int argc, char const *argv[])
     {
         cur_time = time(NULL);
         time_str = gmtime(&cur_time);
-        snprintf(filename, sizeof(filename), "./systems/sys_%d_%d-%d-%d_%d-%d-%d.txt", len, time_str->tm_year,
+        snprintf(filename, sizeof(filename), ".././systems/sys_%d_%d-%d-%d_%d-%d-%d.txt", len, time_str->tm_year,
                  time_str->tm_mon,
                  time_str->tm_mday,
                  time_str->tm_hour,

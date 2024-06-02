@@ -5,7 +5,7 @@
 #include <sys/time.h>
 #include <math.h>
 
-#define THREADS_PER_BLOCKS 16
+#define THREADS_PER_BLOCK 16
 
 double wtime(void)
 {
@@ -68,7 +68,7 @@ __global__ void solve_system_kernel(double* d_system, double* d_solution, const 
 
 int main(int argc, char const *argv[]){
     double** h_sys = NULL;
-    double** d_sys = NULL;
+    double* d_sys = NULL;
     double* h_solution = NULL;
     double* d_solution = NULL;
     int* h_len = NULL;
@@ -96,16 +96,16 @@ int main(int argc, char const *argv[]){
     cudaMalloc((void **)&d_solution, sizeof(double) * (*h_len));
 
     // Copie des données de l'hôte vers le device
-    for(int i = 0; i < h_len; i++) {
+    for(int i = 0; i < (*h_len); i++) {
         cudaMemcpy(d_sys + i * (h_len + 1), h_sys[i], sizeof(double) * (h_len + 1), cudaMemcpyHostToDevice);
     }
 
     // Résolution du système
-     solve_system_kernel<<<(h_len + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_sys, d_solution, const (*h_len));
+    solve_system_kernel<<<(h_len + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_sys, d_solution, const (*h_len));
 
     // Retour des données sur l'host
     cudaMemcpy(h_solution, d_solution, sizeof(double) * h_len, cudaMemcpyDeviceToHost);
-    for(int i = 0; i < h_len; i++) {
+    for(int i = 0; i < (*h_len); i++) {
         cudaMemcpy(h_sys[i], d_sys + i * (h_len + 1), sizeof(double) * (h_len + 1), cudaMemcpyDeviceToHost);
     }
     double tac = wtime();
