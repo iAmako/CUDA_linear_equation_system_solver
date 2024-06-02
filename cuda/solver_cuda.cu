@@ -77,7 +77,7 @@ __global__ void solve_system_kernel(double* d_system, double* d_solution, const 
 
             //Fuck it we ball calcul du max sur le premier thread parce que les réductions aie 
             if(tid == 0){
-                for(int i = 0 ; i < len;i++){
+                for(int i = cur_col ; i < len;i++){
                     if(max_line < fabs( d_system[cur_col + (i*(len+1))])){
                         max_line = fabs(d_system[cur_col + (i*(len+1))] ) ;
                         pivot_line = i;
