@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "solver_cuda.h"
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include <sys/time.h>
 #include <math.h>
+
+#define THREADS_PER_BLOCKS 16
 
 double wtime(void)
 {
@@ -11,219 +14,125 @@ double wtime(void)
   return tv.tv_sec + tv.tv_usec * 1e-6;
 }
 
-#define THREADS_PER_BLOCK 128
+int read_system(double **sys, int *len, double* solution, const char *path){
+    FILE * f;
+    f = fopen(path,"r");
+    int file_read = 0;
+    len = (int*)malloc(sizeof(int));
+    
+    // On alloue le tableau qui stocke la solution
+    solution = (double *)malloc((*len) * sizeof(double));
 
-__global__ void find_pivot_kernel(double* matrix, int* lines_link, int len, int pivot_row, int* pivot_line, double* pivot_value) {
-    extern __shared__ double shared_data[];
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    int local_tid = threadIdx.x;
+    if( ! (f == NULL)){
+        // Recupération du nb de variables
+        if(! (fscanf(f,"%d \n",len) ))
+            return file_read;
+        
+        // On alloue le tableau qui stocke les équations
+        sys = (double **)malloc(sizeof(double *)*(*len));
 
-    if (tid < len) {
-        shared_data[local_tid] = fabs(matrix[lines_link[tid] * (len + 1) + pivot_row]);
-    } else {
-        shared_data[local_tid] = -1.0;
-    }
-
-    __syncthreads();
-
-    // Reduction to find the maximum value and its index
-    for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
-        if (local_tid < stride && (tid + stride) < len) {
-            if (shared_data[local_tid] < shared_data[local_tid + stride]) {
-                shared_data[local_tid] = shared_data[local_tid + stride];
-                lines_link[local_tid] = lines_link[local_tid + stride];
+        // Lecture et remplissage ligne à ligne, /!\ double boucle potentiellement lente.
+        for(int i = 0 ; i < (*len) ; i++){
+            sys[i] = (double *)malloc(sizeof(double )*((*len)+1));
+            for(int j = 0 ; j < (*len)+1 ; j++){
+                if(! (fscanf(f,"%lf",&sys[i][j])))
+                    return file_read;
             }
+            
         }
-        __syncthreads();
+        file_read = 1;
+        fclose(f);
     }
+    return file_read;
+}
 
-    if (local_tid == 0) {
-        if (shared_data[0] > *pivot_value) {
-            *pivot_value = shared_data[0];
-            *pivot_line = lines_link[0];
-        }
+void save_solution(double * solution, const int len, char* path){
+    FILE * save_file;
+    save_file = fopen(path, "w");
+    // Taille du système
+    fprintf(save_file, "%d\n", len);
+    // Sauvegarde de la solution
+    for(int i = 0; i < len; i++)
+        fprintf(save_file, "%lf ", solution[i]);
+    fclose(save_file);
+    return;
+}
+
+// TODO
+__global__ void solve_system_kernel(double* d_system, double* d_solution, const int len){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if(tid < len) {
     }
 }
 
-__global__ void apply_pivot_kernel(double* matrix, int* lines_link, int len, int pivot_row) {
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    if (tid >= len) return;
 
-    int target_line = tid + pivot_row + 1;
-    if (target_line >= len) return;
+int main(int argc, char const *argv[]){
+    double** h_sys = NULL;
+    double** d_sys = NULL;
+    double* h_solution = NULL;
+    double* d_solution = NULL;
+    int* h_len = NULL;
+    // Variable partagée entre tous les threads
+    char h_read_path[128]= "";
+    char save_path[128] = "";
 
-    double multiplier = matrix[lines_link[target_line] * (len + 1) + pivot_row] / matrix[lines_link[pivot_row] * (len + 1) + pivot_row];
-    for (int i = 0; i < len + 1; i++) {
-        matrix[lines_link[target_line] * (len + 1) + i] -= multiplier * matrix[lines_link[pivot_row] * (len + 1) + i];
-    }
-}
-
-
-// boucle des colonnes 
-//      on  trouve le plus grand nombre de la i-ème colonne 
-//      swap la ligne où il y a le plus grand nombre avec la colonne i 
-//      pour chaque ligne suivante, additioner / soustraire la ligne qu'on target par la valeur en colonne i ligne target divisé par la valeur réelle du pivot 
-// 
-//      !! -> garder en mémoire les lignes qu'on swap, (tableau d'entier par lequel on passe pour obtenir les valeurs ?)
-// system : le système à solve
-// path : le path vers le fichier de sortie, qui contiendra la solution
-// verbose : sortie uniquement dans le fichier de sortie si verbose = 0, infos basiques dans la sortie standard si verbose = 1, infos avancée si verbose = 2 (à implémenter)
-/**
- * Résout un système d'équations linéaires 
- * system : le système à résoudre
- * PATH : le chemin vers le fichie de sauvegarde
- * verbose : optionnel | défaut = 1 | définie la précision de la sortie textuel de la fonction
- *           0 = aucune sortie
-*/
-void solve_system_cuda(linear_system* system, char* path, int verbose) {
-    int pivot_line = 0;
-    int* lines_link;
-    int len = system->len;
-
-    lines_link = (int*)malloc(len * sizeof(int));
-    for (int i = 0; i < len; i++) {
-        lines_link[i] = i;
+    if(argc < 2){
+        printf("Utilisation : ./solver_cuda.exe PATH\nAvec :\n\tPATH : Chemin vers le fichier\n");
+        return EXIT_SUCCESS;
     }
 
-    // Allocating memory on GPU
-    double* d_matrix;
-    int* d_lines_link;
-    int* d_pivot_line;
-    double* d_pivot_value;
-    cudaMalloc(&d_matrix, len * (len + 1) * sizeof(double));
-    cudaMalloc(&d_lines_link, len * sizeof(int));
-    cudaMalloc(&d_pivot_line, sizeof(int));
-    cudaMalloc(&d_pivot_value, sizeof(double));
-
-    // Copy data to GPU
-    for (int i = 0; i < len; i++) {
-        cudaMemcpy(d_matrix + i * (len + 1), system->equation[i], (len + 1) * sizeof(double), cudaMemcpyHostToDevice);
+    // Lecture du fichier & Initialisation
+    snprintf(h_read_path,sizeof(h_read_path),"%s",argv[1]);
+    
+    if(!(read_system(h_sys,h_len,h_solution,h_read_path))){
+        printf("Erreur lors de la lecture du fichier \n");
+        return EXIT_SUCCESS;
     }
-    cudaMemcpy(d_lines_link, lines_link, len * sizeof(int), cudaMemcpyHostToDevice);
 
     double tic = wtime();
 
+    // Allocation de mémoire sur le device
+    cudaMalloc((void **)&d_sys, sizeof(double) * (*h_len) * ((*h_len) + 1));
+    cudaMalloc((void **)&d_solution, sizeof(double) * (*h_len));
 
-
-    for (int pivot_row = 0; pivot_row < len - 1; pivot_row++) {
-        cudaMemset(d_pivot_value, 0, sizeof(double));
-        find_pivot_kernel<<<(len + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK, THREADS_PER_BLOCK * sizeof(double)>>>(d_matrix, d_lines_link, len, pivot_row, d_pivot_line, d_pivot_value);
-        cudaMemcpy(&pivot_line, d_pivot_line, sizeof(int), cudaMemcpyDeviceToHost);
-
-        if (verbose > 1) printf("ligne pivot : %d\n", pivot_line);
-
-        if (pivot_line != pivot_row) {
-            if (verbose > 1) printf("échange des lignes %d et %d\n", lines_link[pivot_line], lines_link[pivot_row]);
-            int tmp = lines_link[pivot_line];
-            lines_link[pivot_line] = lines_link[pivot_row];
-            lines_link[pivot_row] = tmp;
-            cudaMemcpy(d_lines_link, lines_link, len * sizeof(int), cudaMemcpyHostToDevice);
-        }
-
-        apply_pivot_kernel<<<(len + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_matrix, d_lines_link, len, pivot_row);
+    // Copie des données de l'hôte vers le device
+    for(int i = 0; i < h_len; i++) {
+        cudaMemcpy(d_sys + i * (h_len + 1), h_sys[i], sizeof(double) * (h_len + 1), cudaMemcpyHostToDevice);
     }
 
+    // Résolution du système
+     solve_system_kernel<<<(h_len + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_sys, d_solution, const (*h_len));
+
+    // Retour des données sur l'host
+    cudaMemcpy(h_solution, d_solution, sizeof(double) * h_len, cudaMemcpyDeviceToHost);
+    for(int i = 0; i < h_len; i++) {
+        cudaMemcpy(h_sys[i], d_sys + i * (h_len + 1), sizeof(double) * (h_len + 1), cudaMemcpyDeviceToHost);
+    }
     double tac = wtime();
-    printf("%lf s Iteratif \n", tac - tic);
-
-    // Copy result back to CPU
-    for (int i = 0; i < len; i++) {
-        cudaMemcpy(system->equation[i], d_matrix + i * (len + 1), (len + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-    }
-
-    save_solution(system, lines_link, path);
-    if (verbose > 0) {
-        printf("Solution sauvegardée : %.64s\n", path);
-    }
-
-    free(lines_link);
-    cudaFree(d_matrix);
-    cudaFree(d_lines_link);
-    cudaFree(d_pivot_line);
-    cudaFree(d_pivot_value);
-}
- 
-/**
- * Echange les adresses de deux lignes de la matrice 
- * lines_link : la matrice des adresses du système d'équations linéaires 
- * line1, line2 : les lignes à échanger
-*/
-void swap_lines(int* lines_link, int line1, int line2){
-
-    int tmp = lines_link[line1];
-    lines_link[line1] = lines_link[line2];
-    lines_link[line2] = tmp;
-}
-
-// la fonction est bien différente de celle utilisée par le générateur de système 
-// puisqu'elle doit prendre en compte que des lignes ont été swaps 
-// ligne 1 : n = la taille 
-// lignes 2 -> n+1 les n prochaines ligne (juste dans l'ordre, pas besoin de lines link vu qu'on a pas changé l'ordre dans la mémoire)
-// ligne n+2 -> la solution  (besoin de lines_link)
-/**
- * Sauvegarde la solution du système d'équations linéaires 
- * sys : le système d'équations linéaires étudié
- * lines_link : La matrice des adresses du système d'équations linéaires
- * PATH : le chemin vers le fichier de sauvegarde
-*/
-void save_solution(linear_system* sys, int* lines_link, char* path){
-
-    FILE * f;
-    // Ouverture du fichier
-    f = fopen(path,"w");
-
-    // Sauvegarde de la taille
-    fprintf(f,"%d\n",sys->len);
-
-    /* //à remettre 
-    // Sauvegarde des nouvelles équations
-    for (int i = 0; i < sys->len; i++)
-    {
-        for (int j = i; j <= sys->len; j++)
-        {
-            fprintf(f,"%lf ",sys->equation[lines_link[i]][j]);
+    printf("%lf s CUDA \n",tac-tic);
+    
+    // Récupération des résultats 
+    for (int i = (*h_len) - 1; i >= 0; i--) {
+        h_solution[i] = h_sys[i][(*h_len)];
+        for (int j = i + 1; j < (*h_len); j++) {
+            h_solution[i] -= h_sys[i][j] * h_solution[j];
         }
-        fprintf(f,"\n");
+        h_solution[i] = h_solution[i] / h_sys[i][i];
     }
-    */
+    
+    // Sauvegarde des résultats
+    snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
+    save_solution(h_solution, *h_len, save_path);
 
-    // Sauvegarde de la solution
-    double* solution;
-    solution = get_solution(sys, lines_link);
-    for (int i = 0; i < sys->len; i++)
-    {
-        fprintf(f,"%lf ",solution[i]);
+    // Libération de la mémoire
+    for(int i = 0; i < (*h_len); i++) {
+        free(h_sys[i]);
     }
+    free(h_sys);
+    free(h_len);
+    free(h_solution);
+    cudaFree(d_sys);
+    cudaFree(d_solution);
 
-    // Libération de la mémoire 
-    free(solution);
-
-    // Fermeture du fichier
-    fclose(f);
-
-}
-
-/**
- * Retourne la solution au système d'équations linéaires triangularisé 
- * sys : le système d'équations linéaires étudié
- * lines_link : La matrice des adresses du système d'équations linéaires
-*/
-double* get_solution(linear_system* sys, int* lines_link){
-
-    double* solution = (double *)malloc(sizeof(double)*sys->len);
-    double tmp_membre_droit;
-    for (int i = sys->len-1; i >= 0; i--)
-    {
-        // On récupère le membre de droite dans l'équation dans tous les cas 
-        tmp_membre_droit = sys->equation[lines_link[i]][sys->len];
-        for (int j = sys->len-1; j > i; j--)
-        {
-            // "On passe à droite" les éléments déjà connus et leur coeff
-           tmp_membre_droit -= solution[j] * sys->equation[lines_link[i]][j];
-        }
-        // Calcul de la valeur de la variable i grâce aux éléments précédemment calculés 
-        solution[i] = tmp_membre_droit / sys->equation[lines_link[i]][i]; 
-    }
-
-    return solution;
+    return 0;   
 }
