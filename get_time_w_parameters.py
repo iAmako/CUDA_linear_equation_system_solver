@@ -26,9 +26,9 @@ if __name__ == "__main__":
 
     # List of solving files (1 10 100 1000 10000)
     parameters = [
-        ["systems/1_sys.txt", "systems/10_sys.txt"],
-        ["systems/100_sys.txt", "systems/1000_sys.txt"],
-        ["systems/10000_sys.txt"]
+        ["../systems/1_sys.txt", "../systems/10_sys.txt"],
+        ["../systems/100_sys.txt", "../systems/1000_sys.txt"],
+        ["../systems/10000_sys.txt"]
     ]
 
     outputs = run_executable_with_parameters(executable_name, parameters)
