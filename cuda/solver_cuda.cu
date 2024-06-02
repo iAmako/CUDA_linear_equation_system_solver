@@ -97,16 +97,16 @@ int main(int argc, char const *argv[]){
 
     // Copie des données de l'hôte vers le device
     for(int i = 0; i < (*h_len); i++) {
-        cudaMemcpy(d_sys + i * (h_len + 1), h_sys[i], sizeof(double) * (h_len + 1), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_sys + i * ((*h_len) + 1), h_sys[i], sizeof(double) * ((*h_len) + 1), cudaMemcpyHostToDevice);
     }
 
     // Résolution du système
-    solve_system_kernel<<<(h_len + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_sys, d_solution, const (*h_len));
+    solve_system_kernel<<<((*h_len) + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_sys, d_solution, (*h_len));
 
     // Retour des données sur l'host
-    cudaMemcpy(h_solution, d_solution, sizeof(double) * h_len, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_solution, d_solution, sizeof(double) * (*h_len), cudaMemcpyDeviceToHost);
     for(int i = 0; i < (*h_len); i++) {
-        cudaMemcpy(h_sys[i], d_sys + i * (h_len + 1), sizeof(double) * (h_len + 1), cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_sys[i], d_sys + i * ((*h_len) + 1), sizeof(double) * ((*h_len) + 1), cudaMemcpyDeviceToHost);
     }
     double tac = wtime();
     printf("%lf s CUDA \n",tac-tic);
