@@ -59,9 +59,7 @@ void save_solution(double * solution, const int len, char* path){
 }
 
 // TODO
-// RECHERCHE DU MAX DE LA COLONNE i
-// INVERSION SI NECESSAIRE
-// PROPAGATION DU PIVOT SUR LES LIGNES A PARTIR DE i
+//QUIT IF MAX = 0 
 __global__ void solve_system_kernel(double* d_system, double* d_solution, const int len, double ** d_lines_begin_adr){
     __shared__ double max_line;
     max_line = 0.0;
@@ -87,8 +85,8 @@ __global__ void solve_system_kernel(double* d_system, double* d_solution, const 
                      
                     
                 }
-                printf("%lf \n",max_line);
-                //Swap sur 0, init un tab d'adresse à intervalle len+1 auparavant et swap, plus simple imo
+              // PREVOIR IF MAX_LINE == 0 QUIT
+                //Swap sur 0, 
                 if(pivot_line != cur_col){
                     tmp_line_swap = d_lines_begin_adr[pivot_line];
                     d_lines_begin_adr[pivot_line]= d_lines_begin_adr[cur_col];
@@ -97,10 +95,22 @@ __global__ void solve_system_kernel(double* d_system, double* d_solution, const 
             }
             //Chaque thread possède le max et on a rangé le tableau
             __syncthreads();
-            
-            
             //Propagation
+            if(tid > cur_col){
+                multiplier = d_lines_begin_adr[tid][cur_col] /d_lines_begin_adr[cur_col ][cur_col];
+    
+                // Application du pivot sur la ligne
+                for (int i = cur_col; i < len+1; i++)
+                {
+                    d_lines_begin_adr[tid][i] -= multiplier * d_lines_begin_adr[cur_col][i] ;
+                }
+            }
             max_line = 0.0;
+            __syncthreads();
+            
+            
+            
+            
          }
          
     }
@@ -152,23 +162,25 @@ int main(int argc, char const *argv[]){
     // Retour des données sur l'host
     //cudaMemcpy(h_solution, d_solution, sizeof(double) * (h_len), cudaMemcpyDeviceToHost);
     for(int i = 0; i < (h_len); i++) {
-        cudaMemcpy(h_sys[i], d_sys + (i * ((h_len) + 1) *sizeof(double)) , sizeof(double) * ((h_len) + 1), cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_sys[i], d_sys + (i * ((h_len) + 1) ) , sizeof(double) * ((h_len) + 1), cudaMemcpyDeviceToHost);
     }
     double tac = wtime();
     printf("%lf s CUDA \n",tac-tic);
    
+    printf("There ???\n");
     // Récupération des résultats 
-    /*for (int i = (h_len) - 1; i >= 0; i--) {
+    for (int i = (h_len) - 1; i >= 0; i--) {
         h_solution[i] = h_sys[i][(h_len)];
         for (int j = i + 1; j < (h_len); j++) {
             h_solution[i] -= h_sys[i][j] * h_solution[j];
         }
         h_solution[i] = h_solution[i] / h_sys[i][i];
-    }*/
+    }
     
+    printf("Here ??\n");
     // Sauvegarde des résultats
-    //snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
-    //save_solution(h_solution, h_len, save_path);
+    snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
+    save_solution(h_solution, h_len, save_path);
 
     // Libération de la mémoire
     for(int i = 0; i < (h_len); i++) {
