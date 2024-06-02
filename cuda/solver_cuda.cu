@@ -5,7 +5,6 @@
 #include <sys/time.h>
 #include <math.h>
 
-#define THREADS_PER_BLOCK 16
 
 double wtime(void)
 {
@@ -58,16 +57,19 @@ void save_solution(double * solution, const int len, char* path){
     return;
 }
 
-// TODO
-//QUIT IF MAX = 0 
+//Var globale pour tous les blocs;
+__device__ double max_line;
+
+
 __global__ void solve_system_kernel(double* d_system, double* d_solution, const int len, double ** d_lines_begin_adr){
-    __shared__ double max_line;
+    
     max_line = 0.0;
 
     int pivot_line;
     double multiplier = 0.0;
     double * tmp_line_swap;
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    printf("%d \n",tid);
 
     if(tid < len) {
         //ON récup les adr des débuts de lignes 
@@ -95,6 +97,7 @@ __global__ void solve_system_kernel(double* d_system, double* d_solution, const 
             }
             //Chaque thread possède le max et on a rangé le tableau
             __syncthreads();
+
             //Propagation
             if(tid > cur_col){
                 multiplier = d_lines_begin_adr[tid][cur_col] /d_lines_begin_adr[cur_col ][cur_col];
@@ -109,8 +112,17 @@ __global__ void solve_system_kernel(double* d_system, double* d_solution, const 
             __syncthreads();
             
             
-            
-            
+         }
+         //Remontee
+         if(tid == 0){
+            // Récupération des résultats 
+            for (int i = (len) - 1; i >= 0; i--) {
+                d_solution[i] = d_lines_begin_adr[i][(len)];
+                for (int j = i + 1; j < (len); j++) {
+                    d_solution[i] -= d_lines_begin_adr[i][j] * d_solution[j];
+                }
+                d_solution[i] = d_solution[i] / d_lines_begin_adr[i][i];
+            }
          }
          
     }
@@ -156,28 +168,17 @@ int main(int argc, char const *argv[]){
     }
 
     // Résolution du système
-    solve_system_kernel<<<((h_len) + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_sys, d_solution, (h_len),d_lines_begin_adr);
+    solve_system_kernel<<<((h_len) + h_len - 1) / h_len, h_len>>>(d_sys, d_solution, (h_len),d_lines_begin_adr);
 
     
     // Retour des données sur l'host
-    //cudaMemcpy(h_solution, d_solution, sizeof(double) * (h_len), cudaMemcpyDeviceToHost);
-    for(int i = 0; i < (h_len); i++) {
-        cudaMemcpy(h_sys[i], d_sys + (i * ((h_len) + 1) ) , sizeof(double) * ((h_len) + 1), cudaMemcpyDeviceToHost);
-    }
+    cudaMemcpy(h_solution, d_solution, sizeof(double) * (h_len), cudaMemcpyDeviceToHost);
+
     double tac = wtime();
     printf("%lf s CUDA \n",tac-tic);
    
-    printf("There ???\n");
-    // Récupération des résultats 
-    for (int i = (h_len) - 1; i >= 0; i--) {
-        h_solution[i] = h_sys[i][(h_len)];
-        for (int j = i + 1; j < (h_len); j++) {
-            h_solution[i] -= h_sys[i][j] * h_solution[j];
-        }
-        h_solution[i] = h_solution[i] / h_sys[i][i];
-    }
     
-    printf("Here ??\n");
+    
     // Sauvegarde des résultats
     snprintf(save_path,sizeof(save_path),"%s_solved.txt",argv[1]); 
     save_solution(h_solution, h_len, save_path);
@@ -188,6 +189,7 @@ int main(int argc, char const *argv[]){
     }
     free(h_sys);
     free(h_solution);
+    
     cudaFree(d_sys);
     cudaFree(d_solution);
     cudaFree(d_lines_begin_adr);
