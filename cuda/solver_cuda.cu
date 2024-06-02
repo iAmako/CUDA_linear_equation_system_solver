@@ -69,7 +69,6 @@ __global__ void solve_system_kernel(double* d_system, double* d_solution, const 
     double multiplier = 0.0;
     double * tmp_line_swap;
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    printf("%d \n",tid);
 
     if(tid < len) {
         //ON récup les adr des débuts de lignes 
